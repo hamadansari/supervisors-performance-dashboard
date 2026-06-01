@@ -1,13 +1,11 @@
---- START OF FILE text/html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Supervisors Performance Dashboard v4.1</title>
+<title>Supervisors Performance Dashboard v4.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* [Keep original CSS here - no changes needed to existing styles, but adding new page styles] */
   :root {
     --bg: #0a0e1a; --bg2: #0f1528; --bg3: #141c35;
     --card: #111827; --card2: #1a2340; --border: #1e2d4a;
@@ -24,6 +22,8 @@
     background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
   .wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 20px; }
+  
+  /* HEADERS */
   .header, .admin-header, .issues-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 20px 28px;
@@ -34,187 +34,187 @@
   .header::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), var(--accent), transparent); }
   .admin-header::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent2), #a78bfa, var(--accent2), transparent); }
   .issues-header::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--red), transparent); }
-  
-  .header-left h1, .admin-header h1, .issues-header h1 { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
-  .issues-header h1 { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.4); }
-  
-  /* Shared styles for buttons and tabs (Keep original) */
-  .tab-btn { padding: 9px 20px; border-radius: 9px; border: none; background: transparent; color: var(--text2); font-family: 'Exo 2', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+
+  .header-left h1 { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
+  .admin-header h1 { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #a78bfa; letter-spacing: 1px; }
+  .issues-header h1 { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--red); letter-spacing: 1px; }
+
+  /* TABS & BUTTONS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px; width: fit-content; }
+  .tab-btn { padding: 9px 20px; border-radius: 9px; border: none; background: transparent; color: var(--text2); font-family: 'Exo 2', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
   .tab-btn.active { background: linear-gradient(135deg, var(--accent2), #4f46e5); color: white; box-shadow: 0 2px 12px rgba(124,58,237,0.4); }
-  .btn-add, .btn-green, .btn-reset, .btn-edit, .btn-del { cursor:pointer; font-family: 'Exo 2', sans-serif; transition: 0.2s; border-radius: 8px; }
   
-  /* --- PAGE SWITCHING --- */
-  #page-admin, #page-issues, #page-login { display: none; }
-  #page-main { display: block; }
-
-  /* [Remaining original CSS here...] */
+  /* KPI CARDS */
   .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
-  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--card2); flex-wrap: wrap; gap: 8px; }
-  .sup-table { width: 100%; border-collapse: collapse; }
-  .sup-table th { text-align: left; font-size: 11px; color: var(--text3); text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid var(--border); }
-  .sup-table td { padding: 12px 12px; border-bottom: 1px solid rgba(30,45,74,0.5); font-size: 13px; color: var(--text2); }
-  
-  .page-nav-wrap { position: relative; display: inline-block; }
-  .page-nav-btn { background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(0,212,255,0.1)); border: 1px solid rgba(124,58,237,0.4); color: #a78bfa; border-radius: 10px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
-  .page-nav-dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 200px; z-index: 500; }
-  .page-nav-wrap.open .page-nav-dropdown { display: block; }
-  .page-nav-item { padding: 12px 16px; font-size: 13px; cursor: pointer; border-bottom: 1px solid rgba(30,45,74,0.5); }
-  .page-nav-item:hover { background: rgba(255,255,255,0.04); }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.blue::before { background: var(--accent); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-value { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+  .kpi-label { font-size: 12px; color: var(--text3); text-transform: uppercase; }
 
-  .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; }
-  .pill-completed { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
-  .pill-open { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
-  .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-  
-  /* Modal Styles */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  /* TABLES */
+  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--card2); }
+  .sup-table { width: 100%; border-collapse: collapse; }
+  .sup-table th { text-align: left; font-size: 11px; color: var(--text3); text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--border); }
+  .sup-table td { padding: 12px; border-bottom: 1px solid rgba(30,45,74,0.5); font-size: 13px; color: var(--text2); }
+
+  /* PAGES VISIBILITY */
+  #page-admin, #page-issues, #page-main { display: none; }
+
+  /* LOGIN PAGE */
+  #page-login { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+  .login-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; width: 400px; box-shadow: var(--glow); text-align: center; }
+  .login-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: white; padding: 12px; margin-top: 15px; outline: none; }
+  .login-btn { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent2), #4f46e5); color: white; font-weight: 700; cursor: pointer; }
+
+  /* DROPDOWN */
+  .page-nav-wrap { position: relative; display: inline-block; }
+  .page-nav-btn { background: rgba(124,58,237,0.1); border: 1px solid var(--accent2); color: #a78bfa; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-family: 'Exo 2'; }
+  .page-nav-dropdown { display: none; position: absolute; right: 0; top: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; min-width: 180px; z-index: 100; margin-top: 10px; }
+  .page-nav-wrap.open .page-nav-dropdown { display: block; }
+  .page-nav-item { padding: 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--border); }
+  .page-nav-item:hover { background: var(--bg3); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 500px; position: relative; }
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; color: var(--text3); margin-bottom: 6px; font-weight: 600; }
-  .form-group input, .form-group select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 12px; outline: none; }
+  .modal { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 15px; width: 450px; }
+  .btn-save { background: var(--accent2); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+  .btn-cancel { background: transparent; color: var(--text3); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<!-- [LOGIN PAGE - No Changes] -->
-<div id="page-login" style="display: flex;">
-  <div class="login-box" style="background:var(--card); padding:40px; border-radius:20px; border:1px solid var(--border); text-align:center;">
-    <h1 style="color:var(--accent); font-family:Rajdhani;">SUPERVISORS DASHBOARD</h1>
-    <div id="login-error" style="color:var(--red); margin:10px 0; display:none;">❌ Invalid ID or Password</div>
-    <input id="login-empid" type="text" placeholder="Employee ID" style="padding:10px; width:100%; margin-top:10px; background:var(--bg3); color:white; border:1px solid var(--border);">
-    <input id="login-pass" type="password" placeholder="Password" style="padding:10px; width:100%; margin-top:10px; background:var(--bg3); color:white; border:1px solid var(--border);">
-    <button onclick="doLogin()" style="width:100%; margin-top:20px; padding:10px; background:var(--accent2); color:white; border:none; border-radius:8px; cursor:pointer;">Login</button>
-    <div style="margin-top:20px;">
-        <span onclick="fillLogin('ADMIN001','admin123')" style="color:var(--text3); cursor:pointer; font-size:12px;">Admin Demo</span> | 
-        <span onclick="fillLogin('EMP001','sup123')" style="color:var(--text3); cursor:pointer; font-size:12px;">Supervisor Demo</span>
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="page-login">
+  <div class="login-box">
+    <h1 style="font-family:Rajdhani; color:var(--accent);">SUPERVISORS DASHBOARD</h1>
+    <p style="color:var(--text3); font-size:12px; margin-bottom:20px;">Please login to continue</p>
+    <div id="login-error" style="color:var(--red); font-size:13px; margin-bottom:10px; display:none;">❌ Invalid ID or Password</div>
+    <input type="text" id="login-empid" class="login-input" placeholder="Employee ID">
+    <input type="password" id="login-pass" class="login-input" placeholder="Password">
+    <button class="login-btn" onclick="doLogin()">Login</button>
+    <div style="margin-top:20px; font-size:12px;">
+        <span onclick="fillLogin('ADMIN001','admin123')" style="cursor:pointer; color:var(--accent2);">Admin Login</span> | 
+        <span onclick="fillLogin('EMP001','sup123')" style="cursor:pointer; color:var(--accent);">Supervisor Login</span>
     </div>
   </div>
 </div>
 
-<!-- ==================== MAIN DASHBOARD PAGE ==================== -->
+<!-- ==================== MAIN DASHBOARD ==================== -->
 <div id="page-main">
   <div class="wrapper">
     <div class="header">
       <div class="header-left">
-        <h1>🏆 PERFORMANCE DASHBOARD</h1>
+        <h1>🏆 SUPERVISORS DASHBOARD</h1>
       </div>
-      <div class="header-user">
-        <div class="page-nav-wrap" id="page-nav-wrap">
-          <button class="page-nav-btn" onclick="togglePageNav()">⚙️ Admin Panel <span class="page-nav-arrow">▼</span></button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="page-nav-wrap" id="nav-wrap">
+          <button class="page-nav-btn" onclick="toggleNav()">⚙️ Admin Menu ▼</button>
           <div class="page-nav-dropdown">
-            <div class="page-nav-item" onclick="switchToPage('admin')">⚙️ Admin Settings</div>
-            <div class="page-nav-item" onclick="switchToPage('issues')">🔍 Issues Tracker</div>
             <div class="page-nav-item" onclick="switchToPage('main')">📊 Dashboard</div>
+            <div class="page-nav-item" onclick="switchToPage('admin')">🔐 User Rights</div>
+            <div class="page-nav-item" onclick="switchToPage('issues')">🔍 Issues Tracker</div>
           </div>
         </div>
-        <button onclick="doLogout()" style="margin-left:10px; background:rgba(239,68,68,0.1); color:var(--red); border:1px solid var(--red); padding:5px 15px; border-radius:8px; cursor:pointer;">Logout</button>
+        <button onclick="doLogout()" style="background:rgba(239,68,68,0.1); color:var(--red); border:1px solid var(--red); padding:8px 15px; border-radius:8px; cursor:pointer;">Logout</button>
       </div>
     </div>
 
-    <!-- Original Dashboard Content -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('overview',this)">📊 Overview</button>
-        <button class="tab-btn" onclick="switchTab('supervisors',this)">👥 Supervisors</button>
+      <button class="tab-btn active">📊 Overview</button>
+      <button class="tab-btn">👥 Supervisors</button>
     </div>
-    <div id="tab-overview" class="tab-content active">
-        <div class="kpi-row">
-            <div class="kpi-card" style="border-top:3px solid var(--accent);">Total Tasks: <span id="ov-total">65</span></div>
-            <div class="kpi-card" style="border-top:3px solid var(--green);">Completed: <span id="ov-completed">62</span></div>
-            <div class="kpi-card" style="border-top:3px solid var(--yellow);">Pending: <span id="ov-pending">3</span></div>
-        </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card blue"><div class="kpi-label">Total Tasks</div><div class="kpi-value">65</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Completed</div><div class="kpi-value">62</div></div>
+      <div class="kpi-card yellow"><div class="kpi-label">Pending</div><div class="kpi-value">3</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Issues</div><div class="kpi-value">5</div></div>
     </div>
   </div>
 </div>
 
-<!-- ==================== ADMIN PAGE ==================== -->
+<!-- ==================== ADMIN / USER RIGHTS PAGE ==================== -->
 <div id="page-admin">
   <div class="wrapper">
     <div class="admin-header">
-      <div>
-        <h1>⚙️ ADMIN CONTROL PANEL</h1>
-        <p>User rights and System Logs</p>
-      </div>
-      <button onclick="switchToPage('main')" style="background:var(--accent); color:black; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:700;">← Back</button>
+      <h1>🔐 USER ACCESS MANAGEMENT</h1>
+      <button onclick="switchToPage('main')" style="background:var(--accent2); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">← Back to Dashboard</button>
     </div>
-
-    <!-- User Management -->
+    
     <div class="section-card">
       <div class="section-header">
-        <span class="section-title">👤 Supervisor Login & Rights</span>
-        <button class="btn-add" onclick="openAddUserModal()" style="background:var(--accent2); color:white; padding:8px 15px; border:none;">+ Add Login</button>
+        <span style="font-weight:700;">Supervisor Logins</span>
+        <button onclick="openAddUserModal()" style="background:var(--accent); color:black; border:none; padding:8px 15px; border-radius:6px; font-weight:700; cursor:pointer;">+ Add User</button>
       </div>
-      <div class="section-body">
-        <table class="sup-table">
-          <thead>
-            <tr><th>Emp ID</th><th>Name</th><th>Password</th><th>Role</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="user-mgmt-tbody"></tbody>
-        </table>
-      </div>
+      <table class="sup-table">
+        <thead>
+          <tr><th>Emp ID</th><th>Name</th><th>Password</th><th>Role</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="user-mgmt-tbody"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<!-- ==================== ISSUES TRACKER PAGE (New Page) ==================== -->
+<!-- ==================== ISSUES TRACKER PAGE ==================== -->
 <div id="page-issues">
-    <div class="wrapper">
-      <div class="issues-header">
-        <div>
-          <h1>🔍 ISSUES & OBSERVATIONS TRACKER</h1>
-          <p>Real-time monitoring of LSC and Area issues</p>
-        </div>
-        <button onclick="switchToPage('main')" style="background:var(--red); color:white; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:700;">← Back</button>
-      </div>
-  
-      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="kpi-card" style="border-top:3px solid var(--red);">High Priority: 4</div>
-        <div class="kpi-card" style="border-top:3px solid var(--orange);">Pending: 2</div>
-        <div class="kpi-card" style="border-top:3px solid var(--green);">Resolved: 3</div>
-      </div>
-  
-      <div class="section-card">
-        <div class="section-header"><span class="section-title">🗂️ Active Issues Tracker</span></div>
-        <div class="section-body">
-            <table class="sup-table">
-                <thead><tr><th>ID</th><th>Date</th><th>Area</th><th>Issue</th><th>Priority</th><th>Status</th></tr></thead>
-                <tbody>
-                    <tr><td>1</td><td>02 Apr 2026</td><td>LSC</td><td>Cleaning Issue</td><td><span style="color:var(--red)">High</span></td><td><span class="status-pill pill-open">Open</span></td></tr>
-                    <tr><td>2</td><td>08 Apr 2026</td><td>LSC</td><td>Security Concern</td><td><span style="color:var(--red)">High</span></td><td><span class="status-pill pill-completed">Resolved</span></td></tr>
-                </tbody>
-            </table>
-        </div>
-      </div>
+  <div class="wrapper">
+    <div class="issues-header">
+      <h1>🔍 OBSERVATIONS & ISSUES TRACKER</h1>
+      <button onclick="switchToPage('main')" style="background:var(--red); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">← Back to Dashboard</button>
     </div>
-  </div>
 
-<!-- ==================== USER MANAGEMENT MODAL ==================== -->
-<div class="modal-overlay" id="modal-user-mgmt">
-    <div class="modal">
-      <h2 id="modal-user-title">👤 User Login</h2>
-      <div class="form-group"><label>Employee ID (Unique)</label><input type="text" id="fu-empid"></div>
-      <div class="form-group"><label>Full Name</label><input type="text" id="fu-name"></div>
-      <div class="form-group"><label>Password</label><input type="text" id="fu-pass"></div>
-      <div class="form-group"><label>Role</label>
-        <select id="fu-role">
-          <option value="supervisor">Supervisor</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <!-- Hidden field to track original ID for updates -->
-      <input type="hidden" id="fu-old-id">
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-        <button onclick="closeModal('modal-user-mgmt')" style="padding:10px 20px; background:var(--bg3); color:white; border:none; border-radius:8px;">Cancel</button>
-        <button onclick="saveUserMgmt()" style="padding:10px 20px; background:var(--accent2); color:white; border:none; border-radius:8px;">Save Changes</button>
-      </div>
+    <div class="kpi-row">
+        <div class="kpi-card red"><div class="kpi-label">High Priority</div><div class="kpi-value">4</div></div>
+        <div class="kpi-card yellow"><div class="kpi-label">Pending</div><div class="kpi-value">2</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-value">3</div></div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">Active Issues Table</div>
+        <table class="sup-table">
+            <thead>
+                <tr><th>ID</th><th>Date</th><th>Area</th><th>Issue</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>02 Apr 2026</td><td>LSC</td><td>Cleaning Concern</td><td style="color:var(--red)">● High</td><td>Open</td></tr>
+                <tr><td>2</td><td>05 Apr 2026</td><td>Packing</td><td>Tape Shortage</td><td style="color:var(--yellow)">● Low</td><td>Resolved</td></tr>
+            </tbody>
+        </table>
     </div>
   </div>
+</div>
+
+<!-- ==================== USER MODAL ==================== -->
+<div class="modal-overlay" id="modal-user">
+    <div class="modal">
+      <h2 id="modal-title" style="margin-bottom:20px; font-family:Rajdhani; color:var(--accent);">Edit User</h2>
+      <div style="display:flex; flex-direction:column; gap:15px;">
+        <div><label style="font-size:12px; color:var(--text3);">Employee ID</label><input type="text" id="fu-empid" class="login-input" style="margin-top:5px;"></div>
+        <div><label style="font-size:12px; color:var(--text3);">Full Name</label><input type="text" id="fu-name" class="login-input" style="margin-top:5px;"></div>
+        <div><label style="font-size:12px; color:var(--text3);">Password</label><input type="text" id="fu-pass" class="login-input" style="margin-top:5px;"></div>
+        <div><label style="font-size:12px; color:var(--text3);">Role</label>
+            <select id="fu-role" class="login-input" style="margin-top:5px;">
+                <option value="supervisor">Supervisor</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+      </div>
+      <input type="hidden" id="fu-old-id">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:30px;">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveUser()">Save Changes</button>
+      </div>
+    </div>
+</div>
 
 <script>
-// ===================== CORE LOGIC =====================
-
 let USERS = [
   { empId: 'ADMIN001', password: 'admin123', name: 'Admin User', role: 'admin' },
   { empId: 'EMP001', password: 'sup123', name: 'Muhammad Mubeen', role: 'supervisor' }
@@ -226,17 +226,10 @@ function doLogin() {
   const user = USERS.find(u => u.empId === id && u.password === pass);
   if(user) {
     document.getElementById('page-login').style.display = 'none';
-    document.getElementById('page-main').style.display = 'block';
+    switchToPage('main');
   } else {
     document.getElementById('login-error').style.display = 'block';
   }
-}
-
-function doLogout() {
-    document.getElementById('page-login').style.display = 'flex';
-    document.getElementById('page-main').style.display = 'none';
-    document.getElementById('page-admin').style.display = 'none';
-    document.getElementById('page-issues').style.display = 'none';
 }
 
 function fillLogin(id, pass) {
@@ -244,109 +237,89 @@ function fillLogin(id, pass) {
     document.getElementById('login-pass').value = pass;
 }
 
-function togglePageNav() {
-  document.getElementById('page-nav-wrap').classList.toggle('open');
+function doLogout() {
+    location.reload();
 }
 
-// ===================== PAGE SWITCHING LOGIC =====================
+function toggleNav() {
+    document.getElementById('nav-wrap').classList.toggle('open');
+}
+
 function switchToPage(page) {
-  document.getElementById('page-nav-wrap').classList.remove('open');
-  
-  // Hide all pages
-  document.getElementById('page-main').style.display = 'none';
-  document.getElementById('page-admin').style.display = 'none';
-  document.getElementById('page-issues').style.display = 'none';
-
-  // Show target page
-  if (page === 'admin') {
-    document.getElementById('page-admin').style.display = 'block';
-    buildUserMgmtTable();
-  } else if (page === 'issues') {
-    document.getElementById('page-issues').style.display = 'block';
-  } else {
-    document.getElementById('page-main').style.display = 'block';
-  }
+    document.getElementById('nav-wrap').classList.remove('open');
+    document.getElementById('page-main').style.display = 'none';
+    document.getElementById('page-admin').style.display = 'none';
+    document.getElementById('page-issues').style.display = 'none';
+    
+    document.getElementById('page-' + page).style.display = 'block';
+    if(page === 'admin') buildUserTable();
 }
 
-// ===================== EMP_ID UPDATE FIX =====================
+// ===================== USER MANAGEMENT FIX =====================
 
-function buildUserMgmtTable() {
-  const tbody = document.getElementById('user-mgmt-tbody');
-  tbody.innerHTML = USERS.map((u, i) => `
-    <tr>
-      <td style="color:var(--accent); font-weight:700;">${u.empId}</td>
-      <td>${u.name}</td>
-      <td><code>${u.password}</code></td>
-      <td>${u.role.toUpperCase()}</td>
-      <td>
-        <button onclick="openEditUserModal('${u.empId}')" style="background:var(--accent2); border:none; padding:3px 8px; color:white; border-radius:4px; cursor:pointer;">Edit</button>
-      </td>
-    </tr>`).join('');
+function buildUserTable() {
+    const tbody = document.getElementById('user-mgmt-tbody');
+    tbody.innerHTML = USERS.map((u, index) => `
+        <tr>
+            <td style="color:var(--accent); font-weight:700;">${u.empId}</td>
+            <td>${u.name}</td>
+            <td>${u.password}</td>
+            <td><span style="text-transform:uppercase; font-size:11px;">${u.role}</span></td>
+            <td><button onclick="openEditUser(${index})" style="background:var(--accent2); color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">Edit</button></td>
+        </tr>
+    `).join('');
 }
 
 function openAddUserModal() {
-  document.getElementById('modal-user-title').textContent = '➕ Add Supervisor Login';
-  document.getElementById('fu-empid').value = '';
-  document.getElementById('fu-name').value = '';
-  document.getElementById('fu-pass').value = 'sup123';
-  document.getElementById('fu-old-id').value = ''; // Empty means new user
-  openModal('modal-user-mgmt');
+    document.getElementById('modal-title').textContent = "➕ Add New User";
+    document.getElementById('fu-empid').value = "";
+    document.getElementById('fu-name').value = "";
+    document.getElementById('fu-pass').value = "sup123";
+    document.getElementById('fu-old-id').value = "NEW";
+    document.getElementById('modal-user').classList.add('open');
 }
 
-function openEditUserModal(empId) {
-  const u = USERS.find(x => x.empId === empId);
-  if(!u) return;
-  document.getElementById('modal-user-title').textContent = '✏️ Edit Supervisor Login';
-  document.getElementById('fu-empid').value = u.empId;
-  document.getElementById('fu-name').value = u.name;
-  document.getElementById('fu-pass').value = u.password;
-  document.getElementById('fu-role').value = u.role;
-  document.getElementById('fu-old-id').value = u.empId; // Store original ID
-  openModal('modal-user-mgmt');
+function openEditUser(index) {
+    const u = USERS[index];
+    document.getElementById('modal-title').textContent = "✏️ Edit User Rights";
+    document.getElementById('fu-empid').value = u.empId;
+    document.getElementById('fu-name').value = u.name;
+    document.getElementById('fu-pass').value = u.password;
+    document.getElementById('fu-role').value = u.role;
+    document.getElementById('fu-old-id').value = index; // Store index for reliable update
+    document.getElementById('modal-user').classList.add('open');
 }
 
-function saveUserMgmt() {
-  const newId = document.getElementById('fu-empid').value.trim().toUpperCase();
-  const name = document.getElementById('fu-name').value.trim();
-  const pass = document.getElementById('fu-pass').value.trim();
-  const role = document.getElementById('fu-role').value;
-  const oldId = document.getElementById('fu-old-id').value;
+function saveUser() {
+    const newId = document.getElementById('fu-empid').value.trim().toUpperCase();
+    const name = document.getElementById('fu-name').value.trim();
+    const pass = document.getElementById('fu-pass').value.trim();
+    const role = document.getElementById('fu-role').value;
+    const updateIdx = document.getElementById('fu-old-id').value;
 
-  if(!newId || !name || !pass) { alert('Please fill all fields'); return; }
+    if(!newId || !name) { alert("Fields cannot be empty!"); return; }
 
-  if (oldId === '') {
-    // Adding new user
-    if(USERS.find(u => u.empId === newId)) { alert('Emp ID already exists!'); return; }
-    USERS.push({ empId: newId, name: name, password: pass, role: role });
-  } else {
-    // Updating existing user
-    const index = USERS.findIndex(u => u.empId === oldId);
-    
-    // Check if new ID is taken by someone else
-    if(newId !== oldId && USERS.find(u => u.empId === newId)) {
-        alert('New Emp ID is already taken by another user!');
-        return;
+    if(updateIdx === "NEW") {
+        if(USERS.find(u => u.empId === newId)) { alert("Emp ID already exists!"); return; }
+        USERS.push({ empId: newId, name, password: pass, role });
+    } else {
+        const idx = parseInt(updateIdx);
+        // Check if ID changed and if new ID is unique
+        if(newId !== USERS[idx].empId && USERS.find(u => u.empId === newId)) {
+            alert("This New Emp ID is already taken!");
+            return;
+        }
+        // Update record by index
+        USERS[idx] = { empId: newId, name, password: pass, role };
     }
-    
-    // Update the record
-    USERS[index] = { empId: newId, name: name, password: pass, role: role };
-  }
 
-  closeModal('modal-user-mgmt');
-  buildUserMgmtTable();
-  alert('User settings updated successfully!');
+    closeModal();
+    buildUserTable();
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// Initial function calls
-function switchTab(tab, btn) {
-    // Simple tab logic for demo
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+function closeModal() {
+    document.getElementById('modal-user').classList.remove('open');
 }
 </script>
-
 </body>
 </html>
