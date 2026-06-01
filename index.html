@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Supervisors Performance Dashboard v2</title>
+<title>Supervisors Performance Dashboard v4</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -297,6 +297,7 @@
   .admin-log-type { font-size:10px; padding:2px 7px; border-radius:8px; font-weight:600; }
   .log-info { background:rgba(0,212,255,0.1);color:var(--accent); }
   .log-warn { background:rgba(245,158,11,0.1);color:var(--yellow); }
+  .log-danger { background:rgba(239,68,68,0.1);color:var(--red); }
   .log-success { background:rgba(16,185,129,0.1);color:var(--green); }
   @media(max-width:900px){ .admin-grid{grid-template-columns:repeat(2,1fr);} .admin-section-grid{grid-template-columns:1fr;} }
   @media(max-width:600px){ .admin-grid{grid-template-columns:1fr 1fr;} }
@@ -342,10 +343,131 @@
   .date-table tr:last-child td { border-bottom: none; }
   .date-table tr:hover td { background: rgba(255,255,255,0.02); }
   @media(max-width:700px){ .date-kpi-row{grid-template-columns:repeat(2,1fr);} }
+
+  /* ==================== LOGIN PAGE ==================== */
+  #page-login {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #page-login::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none;
+  }
+  .login-box {
+    position: relative; z-index: 1;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 44px 40px; width: 420px; max-width: 95vw;
+    box-shadow: 0 0 60px rgba(0,212,255,0.08), 0 20px 60px rgba(0,0,0,0.6);
+    animation: loginFadeIn 0.4s ease;
+  }
+  @keyframes loginFadeIn { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+  .login-box::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:3px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), var(--accent), transparent);
+    border-radius:20px 20px 0 0;
+  }
+  .login-logo { text-align:center; margin-bottom:28px; }
+  .login-logo-icon { font-size:48px; margin-bottom:8px; }
+  .login-logo h1 { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:var(--accent); letter-spacing:1px; text-shadow:0 0 20px rgba(0,212,255,0.4); }
+  .login-logo p { font-size:12px; color:var(--text3); margin-top:4px; }
+  .login-field { margin-bottom:18px; }
+  .login-field label { display:block; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.9px; margin-bottom:8px; font-weight:600; }
+  .login-input-wrap { position:relative; }
+  .login-input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:15px; color:var(--text3); }
+  .login-input {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); padding:12px 14px 12px 42px;
+    font-family:'Exo 2',sans-serif; font-size:14px; outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .login-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,212,255,0.08); }
+  .login-input::placeholder { color:var(--text3); }
+  .login-input.error { border-color:var(--red); box-shadow:0 0 0 3px rgba(239,68,68,0.08); }
+  .login-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:15px; color:var(--text3); user-select:none; }
+  .login-error { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); color:var(--red); border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:16px; display:none; }
+  .login-btn {
+    width:100%; padding:13px; border:none; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent2), #4f46e5);
+    color:white; font-family:'Exo 2',sans-serif; font-size:15px; font-weight:700;
+    cursor:pointer; transition:all 0.2s; letter-spacing:0.5px;
+    box-shadow:0 4px 16px rgba(124,58,237,0.35); margin-top:4px;
+  }
+  .login-btn:hover { transform:translateY(-1px); box-shadow:0 6px 22px rgba(124,58,237,0.45); }
+  .login-btn:active { transform:translateY(0); }
+  .login-btn.loading { opacity:0.7; cursor:not-allowed; }
+  .login-divider { text-align:center; margin:20px 0 16px; font-size:11px; color:var(--text3); }
+  .login-role-hint { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .role-chip { font-size:11px; padding:4px 12px; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+  .role-chip.admin { background:rgba(124,58,237,0.12); color:#a78bfa; border:1px solid rgba(124,58,237,0.2); }
+  .role-chip.admin:hover { background:rgba(124,58,237,0.22); }
+  .role-chip.supervisor { background:rgba(0,212,255,0.1); color:var(--accent); border:1px solid rgba(0,212,255,0.2); }
+  .role-chip.supervisor:hover { background:rgba(0,212,255,0.18); }
+
+  /* ==================== HEADER USER PILL ==================== */
+  .header-user { display:flex; align-items:center; gap:10px; }
+  .user-pill {
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:20px; padding:6px 14px 6px 8px; cursor:pointer;
+    transition:all 0.2s; font-size:13px; color:var(--text2);
+  }
+  .user-pill:hover { border-color:var(--accent); color:var(--text); }
+  .user-avatar {
+    width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:white; flex-shrink:0;
+  }
+  .user-role-badge { font-size:10px; padding:2px 7px; border-radius:6px; font-weight:700; margin-left:2px; }
+  .role-admin-badge { background:rgba(124,58,237,0.15); color:#a78bfa; border:1px solid rgba(124,58,237,0.25); }
+  .role-sup-badge { background:rgba(0,212,255,0.1); color:var(--accent); border:1px solid rgba(0,212,255,0.2); }
+  .logout-btn {
+    background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2);
+    color:var(--red); border-radius:8px; padding:6px 12px;
+    font-family:'Exo 2',sans-serif; font-size:12px; cursor:pointer; transition:all 0.2s;
+  }
+  .logout-btn:hover { background:rgba(239,68,68,0.16); }
 </style>
 </head>
 <body>
-<div id="page-main">
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="page-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">🏆</div>
+      <h1>SUPERVISORS DASHBOARD</h1>
+      <p>Apna Employee ID aur Password darj karein</p>
+    </div>
+    <div class="login-error" id="login-error">❌ Employee ID ya Password galat hai.</div>
+    <div class="login-field">
+      <label>Employee ID</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">👤</span>
+        <input class="login-input" type="text" id="login-empid" placeholder="e.g. EMP001" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">🔒</span>
+        <input class="login-input" type="password" id="login-pass" placeholder="Password darj karein" onkeydown="if(event.key==='Enter')doLogin()">
+        <span class="login-eye" onclick="toggleLoginPass()" id="login-eye">👁️</span>
+      </div>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">🚀 Login</button>
+    <div class="login-divider">— Quick Test Logins —</div>
+    <div class="login-role-hint">
+      <span class="role-chip admin" onclick="fillLogin('ADMIN001','admin123')">⚙️ Admin Demo</span>
+      <span class="role-chip supervisor" onclick="fillLogin('EMP001','sup123')">👤 Supervisor Demo</span>
+    </div>
+  </div>
+</div>
+
+<div id="page-main" style="display:none;">
 <div class="wrapper">
 
   <!-- HEADER -->
@@ -354,17 +476,34 @@
       <h1>🏆 SUPERVISORS PERFORMANCE DASHBOARD</h1>
       <p id="header-subtitle">📅 Apr 1, 2026 — May 6, 2026 &nbsp;|&nbsp; All Shifts &nbsp;|&nbsp; 12 Supervisors</p>
     </div>
-    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="header-user" style="gap:8px;">
+      <button style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);color:#a78bfa;border-radius:8px;padding:6px 12px;font-family:'Exo 2',sans-serif;font-size:12px;cursor:pointer;font-weight:600;" onclick="exportOverviewPdf()" title="Export Overview as PDF">📄 PDF</button>
+      <button style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--green);border-radius:8px;padding:6px 12px;font-family:'Exo 2',sans-serif;font-size:12px;cursor:pointer;font-weight:600;" onclick="exportTasksCsv()" title="Export Tasks CSV">📊 CSV</button>
+      <div class="user-pill" id="user-pill-display">
+        <div class="user-avatar" id="user-avatar-letter">A</div>
+        <span id="user-display-name">User</span>
+        <span class="user-role-badge role-admin-badge" id="user-role-label">ADMIN</span>
+      </div>
+      <div id="admin-nav-btn-wrap" style="display:none;">
+        <div class="page-nav-wrap" id="page-nav-wrap">
+          <button class="page-nav-btn" onclick="togglePageNav()">⚙️ Admin <span class="page-nav-arrow">▼</span></button>
+          <div class="page-nav-dropdown">
+            <div class="page-nav-item" onclick="switchToPage('admin')"><span class="nav-icon">⚙️</span> Admin Panel</div>
+            <div class="page-nav-item" onclick="switchToPage('main')"><span class="nav-icon">📊</span> Dashboard</div>
+          </div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">⏻ Logout</button>
+    </div>
   </div>
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('overview',this)">📊 Overview</button>
-    <button class="tab-btn" onclick="switchTab('supervisors',this)">👥 Supervisors</button>
-    <button class="tab-btn" onclick="switchTab('tasks',this)">📋 All Tasks</button>
-    <button class="tab-btn" onclick="switchTab('roaster',this)">📅 Roaster</button>
-    <button class="tab-btn" onclick="switchTab('observations',this)">🔍 Observations</button>
-    <button class="tab-btn" onclick="switchTab('shifts',this)">🕒 Shifts</button>
+    <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview',this)">📊 Overview</button>
+    <button class="tab-btn" id="tab-btn-supervisors" onclick="switchTab('supervisors',this)">👥 Supervisors</button>
+    <button class="tab-btn" id="tab-btn-tasks" onclick="switchTab('tasks',this)">📋 All Tasks</button>
+    <button class="tab-btn" id="tab-btn-roaster" onclick="switchTab('roaster',this)">📅 Roaster</button>
+    <button class="tab-btn" id="tab-btn-shifts" onclick="switchTab('shifts',this)">🕒 Shifts</button>
   </div>
 
   <!-- ==================== OVERVIEW TAB ==================== -->
@@ -520,6 +659,7 @@
       <button class="btn-reset" onclick="resetTaskFilters()">✕ Reset</button>
       <button class="btn-add" onclick="openAddTaskModal()">+ Add Task</button>
       <button class="btn-csv-template" onclick="toggleCsvSection()">📂 Upload CSV</button>
+      <button class="btn-green" onclick="exportTasksCsv()">📊 CSV Export</button>
     </div>
 
     <!-- CSV Upload Zone (hidden by default) -->
@@ -599,77 +739,6 @@
       <span id="roaster-date-label" style="font-size:13px;color:var(--text3);margin-left:auto;"></span>
     </div>
     <div id="roaster-content"></div>
-  </div>
-
-  <!-- ==================== OBSERVATIONS TAB ==================== -->
-  <div id="tab-observations" class="tab-content">
-    <!-- Page Navigation Dropdown -->
-    <div class="obs-tab-header">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:600;color:var(--text);letter-spacing:0.5px;">🔍 Observations & Issues Tracker</div>
-      <div class="page-nav-wrap" id="page-nav-wrap">
-        <button class="page-nav-btn" onclick="togglePageNav()">
-          <span>🏠 Supervisor Dashboard</span>
-          <span class="page-nav-arrow">▼</span>
-        </button>
-        <div class="page-nav-dropdown">
-          <div class="page-nav-item active-page" onclick="closePageNav()">
-            <span class="nav-icon">🏠</span>
-            <span>Supervisor Dashboard</span>
-          </div>
-          <div class="page-nav-item" onclick="switchToPage('admin')">
-            <span class="nav-icon">⚙️</span>
-            <span>Admin Control Panel</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-      <div class="kpi-card blue"><div class="kpi-label">Total Observations</div><div class="kpi-value">5</div><div class="kpi-sub">All categories</div></div>
-      <div class="kpi-card yellow"><div class="kpi-label">Pending</div><div class="kpi-value">2</div><div class="kpi-sub">Requires resolution</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-value">3</div><div class="kpi-sub">Successfully closed</div></div>
-    </div>
-    <div class="grid-2">
-      <div class="section-card">
-        <div class="section-header"><span class="section-title">📊 Aging Monitor</span><span class="section-badge badge-red">Real Time</span></div>
-        <div class="section-body">
-          <div class="obs-kpi-row">
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--red)">2</div><div class="obs-kpi-lbl">🔴 High Aging</div></div>
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--yellow)">0</div><div class="obs-kpi-lbl">🟡 Action Required</div></div>
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--green)">0</div><div class="obs-kpi-lbl">🟢 On Track</div></div>
-          </div>
-          <div style="padding:12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;">
-            <div style="font-size:12px;color:var(--red);font-weight:600;margin-bottom:6px;">⚡ High Priority Alert</div>
-            <div style="font-size:12px;color:var(--text2);">🚨 High Priority Pending Issues Require Immediate Action!</div>
-          </div>
-        </div>
-      </div>
-      <div class="section-card">
-        <div class="section-header"><span class="section-title">🧹 Pending by Category</span><span class="section-badge badge-yellow">Breakdown</span></div>
-        <div class="section-body">
-          <div class="obs-kpi-row">
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--red)">1</div><div class="obs-kpi-lbl">🚩 Admin</div></div>
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--orange)">0</div><div class="obs-kpi-lbl">⛔ HSSE</div></div>
-            <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--yellow)">1</div><div class="obs-kpi-lbl">🧹 5S</div></div>
-          </div>
-          <div style="margin-top:8px;font-size:12px;color:var(--text3);">Period: Apr 1 – Apr 8, 2026</div>
-        </div>
-      </div>
-    </div>
-    <div class="section-card">
-      <div class="section-header"><span class="section-title">🗂️ Admin Tracker Issues</span><span class="section-badge badge-red">5 Records</span></div>
-      <div class="scroll-body">
-        <table class="issues-table">
-          <thead><tr><th>ID</th><th>Date Raised</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>02 Apr 2026</td><td>LSC</td><td>Cleaning</td><td>Admin</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
-            <tr><td>2</td><td>08 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
-            <tr><td>3</td><td>06 Apr 2026</td><td>LSC</td><td>Security</td><td>HSSE</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
-            <tr><td>4</td><td>06 Apr 2026</td><td>LSC</td><td>Tape</td><td>5S</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-open"><span class="pill-dot"></span>Open</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
-            <tr><td>5</td><td>05 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="priority-low">● Low</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-open"><span class="pill-dot"></span>Open</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 
   <!-- ==================== SHIFTS TAB ==================== -->
@@ -775,11 +844,28 @@
 
   <!-- Activity Log -->
   <div class="section-card" style="margin-bottom:24px;">
-    <div class="section-header">
-      <span class="section-title">📜 Recent Activity Log</span>
-      <span class="section-badge badge-blue" id="adm-log-count">8 Events</span>
+    <div class="section-header" style="flex-wrap:wrap;gap:10px;">
+      <span class="section-title">📜 Real-Time Activity Log</span>
+      <span class="section-badge badge-blue" id="adm-log-count">0 Events</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;">
+        <input type="text" id="log-filter-user" placeholder="🔍 User name..." oninput="filterActivityLog()"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;width:140px;">
+        <select id="log-filter-type" onchange="filterActivityLog()"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;">
+          <option value="">All Types</option>
+          <option value="success">✅ Success</option>
+          <option value="info">ℹ️ Info</option>
+          <option value="warn">⚠️ Warning</option>
+          <option value="danger">🗑️ Delete</option>
+        </select>
+        <button onclick="exportActivityLogCsv()" class="btn-green" style="padding:6px 12px;font-size:12px;">📊 Export Log CSV</button>
+        <button onclick="activityLog=[];renderActivityLog();" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:8px;padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;cursor:pointer;">🗑️ Clear</button>
+      </div>
     </div>
-    <div class="section-body scroll-body" style="max-height:300px;" id="adm-log-body">
+    <div style="padding:8px 20px 0;font-size:11px;color:var(--text3);">
+      ⚡ Har login, logout, task add/edit/delete, status change, CSV import — sab track hota hai. Session ke baad log clear ho jata hai.
+    </div>
+    <div class="section-body scroll-body" style="max-height:400px;" id="adm-log-body">
       <!-- built by JS -->
     </div>
   </div>
@@ -796,9 +882,97 @@
         <button class="btn-csv-template" onclick="downloadCsvTemplate()">⬇️ Download CSV Template</button>
         <button style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:8px;padding:9px 16px;font-family:'Exo 2',sans-serif;font-size:13px;cursor:pointer;" onclick="if(confirm('Clear all tasks?')){allTasks=[];refreshAll();alert('✅ All tasks cleared.');}">🗑️ Clear All Tasks</button>
         <button class="btn-green" onclick="exportAllData()">📤 Export All Data (JSON)</button>
+        <button class="btn-green" onclick="exportTasksCsv()">📊 Export Tasks (CSV)</button>
+        <button style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);color:#a78bfa;border-radius:8px;padding:9px 16px;font-family:'Exo 2',sans-serif;font-size:13px;cursor:pointer;font-weight:600;" onclick="exportOverviewPdf()">📄 Export Overview (PDF)</button>
       </div>
       <div style="margin-top:14px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text3);">
         💡 <strong style="color:var(--text2);">CSV Upload Guide:</strong> Go to All Tasks tab → Click "📂 Upload CSV" → Upload your file with columns: <code style="color:var(--accent);">date, shift, supervisor, task, priority, status</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== OBSERVATIONS SECTION (Admin Only) ==================== -->
+  <div class="section-card" style="margin-bottom:24px;">
+    <div class="section-header">
+      <span class="section-title">🔍 Observations & Issues Tracker</span>
+      <span class="section-badge badge-red">Admin Only</span>
+    </div>
+    <div class="section-body">
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+        <div class="kpi-card blue"><div class="kpi-label">Total Observations</div><div class="kpi-value">5</div><div class="kpi-sub">All categories</div></div>
+        <div class="kpi-card yellow"><div class="kpi-label">Pending</div><div class="kpi-value">2</div><div class="kpi-sub">Requires resolution</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-value">3</div><div class="kpi-sub">Successfully closed</div></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div class="section-card">
+          <div class="section-header"><span class="section-title">📊 Aging Monitor</span><span class="section-badge badge-red">Real Time</span></div>
+          <div class="section-body">
+            <div class="obs-kpi-row">
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--red)">2</div><div class="obs-kpi-lbl">🔴 High Aging</div></div>
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--yellow)">0</div><div class="obs-kpi-lbl">🟡 Action Required</div></div>
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--green)">0</div><div class="obs-kpi-lbl">🟢 On Track</div></div>
+            </div>
+            <div style="padding:12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;">
+              <div style="font-size:12px;color:var(--red);font-weight:600;margin-bottom:6px;">⚡ High Priority Alert</div>
+              <div style="font-size:12px;color:var(--text2);">🚨 High Priority Pending Issues Require Immediate Action!</div>
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><span class="section-title">🧹 Pending by Category</span><span class="section-badge badge-yellow">Breakdown</span></div>
+          <div class="section-body">
+            <div class="obs-kpi-row">
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--red)">1</div><div class="obs-kpi-lbl">🚩 Admin</div></div>
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--orange)">0</div><div class="obs-kpi-lbl">⛔ HSSE</div></div>
+              <div class="obs-kpi"><div class="obs-kpi-val" style="color:var(--yellow)">1</div><div class="obs-kpi-lbl">🧹 5S</div></div>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text3);">Period: Apr 1 – Apr 8, 2026</div>
+          </div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><span class="section-title">🗂️ Admin Tracker Issues</span><span class="section-badge badge-red">5 Records</span></div>
+        <div class="scroll-body">
+          <table class="issues-table">
+            <thead><tr><th>ID</th><th>Date Raised</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>02 Apr 2026</td><td>LSC</td><td>Cleaning</td><td>Admin</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
+              <tr><td>2</td><td>08 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
+              <tr><td>3</td><td>06 Apr 2026</td><td>LSC</td><td>Security</td><td>HSSE</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-closed"><span class="pill-dot"></span>Closed</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
+              <tr><td>4</td><td>06 Apr 2026</td><td>LSC</td><td>Tape</td><td>5S</td><td><span class="priority-high">● High</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-open"><span class="pill-dot"></span>Open</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
+              <tr><td>5</td><td>05 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="priority-low">● Low</span></td><td>Muhammad Mubeen</td><td><span class="status-pill pill-open"><span class="pill-dot"></span>Open</span></td><td><span class="aging-high">🔴 High Aging</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== USER MANAGEMENT (Admin Only) ==================== -->
+  <div class="section-card" style="margin-bottom:24px;">
+    <div class="section-header">
+      <span class="section-title">👤 Supervisor Logins & Rights Management</span>
+      <span class="section-badge badge-purple">Admin Only</span>
+      <button class="btn-add" style="margin-left:auto;" onclick="openAddUserModal()">+ Add Supervisor Login</button>
+    </div>
+    <div class="section-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">⚡ Har supervisor ka login aur access rights yahan manage karein. Changes turant lagu ho jaate hain.</div>
+      <div style="overflow-x:auto;">
+        <table class="sup-table" id="user-mgmt-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Password</th>
+              <th>Role</th>
+              <th>Denied Tabs</th>
+              <th>Denied Features</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="user-mgmt-tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -901,7 +1075,199 @@
   </div>
 </div>
 
+<!-- ==================== USER MANAGEMENT MODAL ==================== -->
+<div class="modal-overlay" id="modal-user-mgmt">
+  <div class="modal" style="width:600px;max-width:96vw;">
+    <h2 id="modal-user-title">👤 Add Supervisor Login</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group"><label>Employee ID</label><input type="text" id="fu-empid" placeholder="e.g. EMP013"></div>
+      <div class="form-group"><label>Password</label><input type="text" id="fu-pass" placeholder="Password set karein"></div>
+      <div class="form-group"><label>Full Name</label><input type="text" id="fu-name" placeholder="Full name..."></div>
+      <div class="form-group"><label>Role</label>
+        <select id="fu-role">
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:8px;">
+      <label>🚫 Denied Tabs (jin tabs tak access nahi hogi)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-overview" value="overview"> Overview
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-supervisors" value="supervisors"> Supervisors
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-tasks" value="tasks"> All Tasks
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-roaster" value="roaster" checked> Roaster
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-shifts" value="shifts" checked> Shifts
+        </label>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:8px;">
+      <label>🚫 Denied Features</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-addTask" value="addTask" checked> Add Task
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-editTask" value="editTask" checked> Edit Task
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-deleteTask" value="deleteTask" checked> Delete Task
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-csvUpload" value="csvUpload" checked> CSV Upload
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);font-weight:normal;text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="deny-addSupervisor" value="addSupervisor" checked> Add Supervisor
+        </label>
+      </div>
+    </div>
+    <input type="hidden" id="fu-edit-empid" value="">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-user-mgmt')">Cancel</button>
+      <button class="btn-save" onclick="saveUserMgmt()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ===================== DATA =====================
+
+// ========== USERS (Login credentials) ==========
+// permissions: denied tabs/features for this supervisor
+// deniedTabs: array of tab names ['roaster','shifts','tasks','supervisors','overview']
+// deniedFeatures: array ['addTask','editTask','deleteTask','csvUpload','addSupervisor']
+let USERS = [
+  { empId: 'ADMIN001', password: 'admin123', name: 'Admin User',    role: 'admin', deniedTabs:[], deniedFeatures:[] },
+  { empId: 'EMP001',   password: 'sup123',   name: 'Muhammad Mubeen', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP002',   password: 'sup123',   name: 'Amir Zaman',      role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP003',   password: 'sup123',   name: 'Umer Imran',      role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP004',   password: 'sup123',   name: 'Danish Mehmood',  role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP005',   password: 'sup123',   name: 'Muhammad Hamid Rafique', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP006',   password: 'sup123',   name: 'Ahsan Jilani',    role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP007',   password: 'sup123',   name: 'Muhammad Subhan', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP008',   password: 'sup123',   name: 'Umer Ijaz',       role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP009',   password: 'sup123',   name: 'Muhammad Abdullah', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP010',   password: 'sup123',   name: 'Muhammad Ahsan Amjad', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP011',   password: 'sup123',   name: 'Abubakar Farid',  role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+  { empId: 'EMP012',   password: 'sup123',   name: 'Ghazi Salah Ud Din Mirza', role: 'supervisor', deniedTabs:['roaster','shifts'], deniedFeatures:['addTask','editTask','deleteTask','csvUpload','addSupervisor'] },
+];
+let currentUser = null;
+
+// ===================== LOGIN =====================
+function doLogin() {
+  const empId = document.getElementById('login-empid').value.trim().toUpperCase();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('login-btn');
+  document.getElementById('login-empid').classList.remove('error');
+  document.getElementById('login-pass').classList.remove('error');
+  errEl.style.display = 'none';
+  if(!empId || !pass) {
+    errEl.textContent = '❌ Employee ID aur Password dono darj karein.';
+    errEl.style.display = 'block';
+    return;
+  }
+  btn.textContent = '⏳ Logging in...'; btn.classList.add('loading');
+  setTimeout(() => {
+    const user = USERS.find(u => u.empId === empId && u.password === pass);
+    btn.textContent = '🚀 Login'; btn.classList.remove('loading');
+    if(!user) {
+      errEl.textContent = '❌ Employee ID ya Password galat hai.';
+      errEl.style.display = 'block';
+      document.getElementById('login-empid').classList.add('error');
+      document.getElementById('login-pass').classList.add('error');
+      return;
+    }
+    currentUser = user;
+    document.getElementById('page-login').style.display = 'none';
+    document.getElementById('page-main').style.display = 'block';
+    applyRoleAccess(user);
+    initDashboard();
+    logActivity('LOGIN', user.name + ' ne login kiya (' + user.role + ')', 'success');
+  }, 400);
+}
+function fillLogin(id, pass) {
+  document.getElementById('login-empid').value = id;
+  document.getElementById('login-pass').value  = pass;
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-empid').classList.remove('error');
+  document.getElementById('login-pass').classList.remove('error');
+}
+function toggleLoginPass() {
+  const inp = document.getElementById('login-pass');
+  const eye = document.getElementById('login-eye');
+  if(inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁️'; }
+}
+function doLogout() {
+  if(currentUser) logActivity('LOGOUT', currentUser.name + ' ne logout kiya', 'warn');
+  currentUser = null;
+  window._supervisorFilter = null;
+  window._isSupervisor = false;
+  window._hideAdminControls = false;
+  document.getElementById('page-main').style.display  = 'none';
+  document.getElementById('page-admin').style.display = 'none';
+  document.getElementById('page-login').style.display = 'flex';
+  document.getElementById('login-empid').value = '';
+  document.getElementById('login-pass').value  = '';
+  document.getElementById('login-error').style.display = 'none';
+  // Reset tabs visibility
+  document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
+  const adminBtn = document.getElementById('admin-nav-btn-wrap');
+  if(adminBtn) adminBtn.style.display = 'none';
+}
+
+// ===================== ROLE-BASED ACCESS =====================
+function applyRoleAccess(user) {
+  document.getElementById('user-display-name').textContent = user.name.split(' ')[0];
+  document.getElementById('user-avatar-letter').textContent = user.name.charAt(0).toUpperCase();
+  const roleBadge = document.getElementById('user-role-label');
+  if(user.role === 'admin') {
+    roleBadge.textContent = 'ADMIN';
+    roleBadge.className = 'user-role-badge role-admin-badge';
+    window._isSupervisor = false;
+    window._hideAdminControls = false;
+    window._supervisorFilter = null;
+    // Show all tabs
+    document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
+    // Show admin button
+    const adminBtn = document.getElementById('admin-nav-btn-wrap');
+    if(adminBtn) adminBtn.style.display = 'block';
+  } else {
+    roleBadge.textContent = 'SUPERVISOR';
+    roleBadge.className = 'user-role-badge role-sup-badge';
+    window._isSupervisor = true;
+    window._hideAdminControls = true;
+    window._supervisorFilter = user.name;
+    // Hide admin button for supervisors
+    const adminBtn = document.getElementById('admin-nav-btn-wrap');
+    if(adminBtn) adminBtn.style.display = 'none';
+    // Hide denied tabs
+    const tabMap = {
+      roaster: 'tab-btn-roaster',
+      shifts: 'tab-btn-shifts',
+      tasks: 'tab-btn-tasks',
+      supervisors: 'tab-btn-supervisors',
+      overview: 'tab-btn-overview'
+    };
+    document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
+    const denied = user.deniedTabs || ['roaster','shifts'];
+    denied.forEach(t => {
+      const el = document.getElementById(tabMap[t]);
+      if(el) el.style.display = 'none';
+    });
+  }
+}
+
 // ===================== DATA =====================
 let supervisors = [
   { rank:1, name:'Ghazi Salah Ud Din Mirza', shift:'Night', timing:'10PM–7AM', total:6, completed:6, pending:0, pct:100 },
@@ -1004,6 +1370,27 @@ let shiftEntries = [
 let pendingDelete = null;
 let pendingDeleteType = null;
 
+// ===================== ACTIVITY LOG SYSTEM =====================
+let activityLog = [];
+
+function logActivity(action, detail, type='info') {
+  // type: 'info' | 'success' | 'warn' | 'danger'
+  const user = currentUser ? currentUser.name : 'System';
+  const role = currentUser ? currentUser.role : 'system';
+  const entry = {
+    time: new Date(),
+    timeStr: new Date().toLocaleTimeString('en-PK', {hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    dateStr: new Date().toLocaleDateString('en-PK', {day:'2-digit',month:'short',year:'numeric'}),
+    user,
+    role,
+    action,
+    detail,
+    type
+  };
+  activityLog.unshift(entry); // newest first
+  if(activityLog.length > 200) activityLog.pop(); // keep last 200
+}
+
 // ===================== HELPERS =====================
 function getPctClass(pct) {
   if(pct===100) return ['prog-100','pct-100'];
@@ -1042,8 +1429,14 @@ function switchTab(tab, btn) {
 
 // ===================== OVERVIEW =====================
 function updateOverview() {
-  const total = allTasks.length;
-  const completed = allTasks.filter(t=>t.status==='Completed').length;
+  const today = new Date(); today.setHours(23,59,59,999);
+  // For overview KPIs: only past + today tasks, filtered by supervisor if needed
+  const visibleTasks = allTasks.filter(t=>{
+    if(window._supervisorFilter && t.supervisor !== window._supervisorFilter) return false;
+    try { return parseDate(t.date) <= today; } catch(e){ return true; }
+  });
+  const total = visibleTasks.length;
+  const completed = visibleTasks.filter(t=>t.status==='Completed').length;
   const pending = total - completed;
   const pct = total>0 ? (completed/total*100) : 0;
   document.getElementById('ov-total').textContent = total;
@@ -1063,9 +1456,9 @@ function updateOverview() {
   document.getElementById('donut-completed').setAttribute('stroke-dasharray', `${cFill} ${circ-cFill}`);
   document.getElementById('donut-pending').setAttribute('stroke-dasharray', `${pFill} ${circ-pFill}`);
   document.getElementById('donut-pending').setAttribute('stroke-dashoffset', -(circ - (circ - pFill) + cFill - circ) + '');
-  // pending alerts
+  // pending alerts — only past + today
   const alertsEl = document.getElementById('pending-alerts');
-  const pendingTasks = allTasks.filter(t=>t.status==='Pending');
+  const pendingTasks = visibleTasks.filter(t=>t.status==='Pending');
   if(pendingTasks.length===0){ alertsEl.innerHTML='<div style="color:var(--green);font-size:13px;">✅ No pending tasks!</div>'; return; }
   alertsEl.innerHTML = pendingTasks.map(t=>`
     <div class="pending-item">
@@ -1135,8 +1528,8 @@ function buildSupTable(data) {
       <td><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill ${pc}" style="width:${s.pct}%"></div></div><span class="prog-pct ${tc}">${pctFmt}</span></div></td>
       <td>${s.pending===0?'<span class="status-pill pill-completed"><span class="pill-dot"></span>Complete</span>':'<span class="status-pill pill-pending"><span class="pill-dot"></span>Pending</span>'}</td>
       <td><div class="action-btns">
-        <button class="btn-edit" onclick="openEditSupModal(${realIdx})">✏️ Edit</button>
-        <button class="btn-del" onclick="openDeleteModal('sup',${realIdx},'${s.name}')">🗑️</button>
+        ${window._hideAdminControls ? '' : `<button class="btn-edit" onclick="openEditSupModal(${realIdx})">✏️ Edit</button>
+        <button class="btn-del" onclick="openDeleteModal('sup',${realIdx},'${s.name}')">🗑️</button>`}
       </div></td>
     </tr>`;
   }).join('');
@@ -1165,6 +1558,8 @@ function resetFilters() {
 // ===================== TASK TABLE =====================
 function buildTaskTable(data) {
   const tbody = document.getElementById('task-tbody');
+  // If supervisor logged in, hide supervisor column option
+  const showSupCol = !window._supervisorFilter;
   tbody.innerHTML = data.map((t,i)=>{
     const realIdx = allTasks.indexOf(t);
     return `<tr>
@@ -1176,8 +1571,8 @@ function buildTaskTable(data) {
       <td><span class="priority-${t.priority==='High'?'high':'low'}">● ${t.priority}</span></td>
       <td>${t.status==='Completed'?'<span class="status-pill pill-completed"><span class="pill-dot"></span>Completed</span>':'<span class="status-pill pill-pending"><span class="pill-dot"></span>Pending</span>'}</td>
       <td><div class="action-btns">
-        <button class="btn-edit" onclick="openEditTaskModal(${realIdx})">✏️ Edit</button>
-        <button class="btn-del" onclick="openDeleteModal('task',${realIdx},'${t.task.replace(/'/g,"\\'")}: ${t.supervisor}')">🗑️</button>
+        ${window._hideAdminControls ? '' : `<button class="btn-edit" onclick="openEditTaskModal(${realIdx})">✏️ Edit</button>
+        <button class="btn-del" onclick="openDeleteModal('task',${realIdx},'${t.task.replace(/'/g,"\\'")}')">🗑️</button>`}
       </div></td>
     </tr>`;
   }).join('');
@@ -1191,6 +1586,8 @@ function filterTasks() {
   const from = document.getElementById('task-date-from').value;
   const to = document.getElementById('task-date-to').value;
   buildTaskTable(allTasks.filter(t=>{
+    // Supervisor sees only own tasks
+    if(window._supervisorFilter && t.supervisor !== window._supervisorFilter) return false;
     if(search && !t.task.toLowerCase().includes(search) && !t.supervisor.toLowerCase().includes(search)) return false;
     if(sup && t.supervisor!==sup) return false;
     if(status && t.status!==status) return false;
@@ -1379,8 +1776,10 @@ function saveTask() {
   const idx = document.getElementById('ft-edit-idx').value;
   if(idx !== '') {
     allTasks[parseInt(idx)] = {...allTasks[parseInt(idx)], date, shift, supervisor, task, priority, status};
+    logActivity('EDIT TASK', supervisor + ' ki task update ki: "' + task + '"', 'info');
   } else {
     allTasks.push({date,shift,supervisor,task,priority,status});
+    logActivity('ADD TASK', supervisor + ' ke liye task add ki: "' + task + '" (' + date + ')', 'success');
   }
   closeModal('modal-task');
   refreshAll();
@@ -1419,6 +1818,7 @@ function saveSupervisor() {
     shiftEntries.forEach(e=>{ if(e.name===oldName) e.name=name; });
   } else {
     supervisors.push({rank:supervisors.length+1, name, shift, timing, total:0, completed:0, pending:0, pct:100});
+    logActivity('ADD SUPERVISOR', name + ' ko supervisor list mein add kiya (' + shift + ' shift)', 'success');
   }
   closeModal('modal-sup');
   refreshAll();
@@ -1450,6 +1850,7 @@ function applyShiftChange() {
   // Update supervisor shift
   const supRec = supervisors.find(s=>s.name===fromName);
   if(supRec) supRec.shift = newShift;
+  logActivity('SHIFT CHANGE', fromName + ' → ' + toName + ' (' + newShift + '), ' + transferred + ' tasks transfer', 'warn');
   closeModal('modal-shift-change');
   alert(`✅ ${transferred} tasks transferred from ${fromName} to ${toName} in ${newShift} shift.`);
   refreshAll();
@@ -1499,9 +1900,21 @@ function openDeleteModal(type, idx, label) {
   openModal('modal-confirm');
 }
 function confirmDelete() {
-  if(pendingDeleteType==='task') { allTasks.splice(pendingDelete, 1); refreshAll(); }
-  else if(pendingDeleteType==='sup') { supervisors.splice(pendingDelete,1); refreshAll(); }
-  else if(pendingDeleteType==='shift') { shiftEntries.splice(pendingDelete,1); buildShiftsTable(); }
+  if(pendingDeleteType==='task') {
+    const t = allTasks[pendingDelete];
+    logActivity('DELETE TASK', '"' + (t?t.task:'?') + '" task delete ki (' + (t?t.supervisor:'?') + ')', 'danger');
+    allTasks.splice(pendingDelete, 1); refreshAll();
+  }
+  else if(pendingDeleteType==='sup') {
+    const s = supervisors[pendingDelete];
+    logActivity('DELETE SUPERVISOR', (s?s.name:'?') + ' ko supervisors se remove kiya', 'danger');
+    supervisors.splice(pendingDelete,1); refreshAll();
+  }
+  else if(pendingDeleteType==='shift') {
+    const e = shiftEntries[pendingDelete];
+    logActivity('DELETE SHIFT', (e?e.name:'?') + ' ki shift entry delete ki', 'warn');
+    shiftEntries.splice(pendingDelete,1); buildShiftsTable();
+  }
   closeModal('modal-confirm');
   pendingDelete=null; pendingDeleteType=null;
 }
@@ -1516,6 +1929,7 @@ function toggleTaskStatus(idx, el) {
   t.status = t.status==='Completed'?'Pending':'Completed';
   el.className = 'task-check '+(t.status==='Completed'?'done':'pending');
   el.textContent = t.status==='Completed'?'✓':'○';
+  logActivity('STATUS CHANGE', '"' + t.task + '" (' + t.supervisor + ') → ' + t.status, t.status==='Completed'?'success':'warn');
   recalcSupervisors();
   updateOverview();
 }
@@ -1533,7 +1947,7 @@ function refreshAll() {
 }
 
 // ===================== INIT =====================
-(function init(){
+function initDashboard() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('roaster-date').value = today;
   recalcSupervisors();
@@ -1545,12 +1959,32 @@ function refreshAll() {
   buildRoasterView();
   buildDateAnalysis();
   buildAdminPage();
-})();
+
+  // Role-based UI: hide admin-only controls for supervisors
+  if(window._isSupervisor) {
+    const csvBtn = document.querySelector('button[onclick="toggleCsvSection()"]');
+    const addTaskBtns = document.querySelectorAll('button[onclick="openAddTaskModal()"]');
+    const addSupBtn = document.querySelector('button[onclick="openAddSupModal()"]');
+    if(csvBtn) csvBtn.style.display='none';
+    addTaskBtns.forEach(b=>b.style.display='none');
+    if(addSupBtn) addSupBtn.style.display='none';
+    window._hideAdminControls = true;
+    // Re-render task table filtered to this supervisor
+    filterTasks();
+  } else {
+    window._hideAdminControls = false;
+    filterTasks();
+  }
+}
 
 // ===================== PAGE SWITCH =====================
 function switchToPage(page) {
   closePageNav();
   if(page === 'admin') {
+    if(currentUser && currentUser.role !== 'admin') {
+      alert('⛔ Sirf Admin is page ko access kar sakta hai.');
+      return;
+    }
     document.getElementById('page-main').style.display = 'none';
     document.getElementById('page-admin').style.display = 'block';
     buildAdminPage();
@@ -1575,23 +2009,8 @@ function buildAdminPage() {
   document.getElementById('adm-supervisors').textContent = supervisors.length;
   document.getElementById('adm-tasks').textContent = allTasks.length;
   document.getElementById('adm-pending').textContent = allTasks.filter(t=>t.status==='Pending').length;
-  const logs = [
-    { time: new Date().toLocaleTimeString(), msg: 'Dashboard loaded successfully', type: 'log-success' },
-    { time: new Date(Date.now()-60000).toLocaleTimeString(), msg: `${allTasks.length} tasks in system`, type: 'log-info' },
-    { time: new Date(Date.now()-120000).toLocaleTimeString(), msg: `${supervisors.filter(s=>s.pending>0).length} supervisors with pending tasks`, type: 'log-warn' },
-    { time: new Date(Date.now()-300000).toLocaleTimeString(), msg: 'Supervisor data recalculated', type: 'log-success' },
-    { time: new Date(Date.now()-600000).toLocaleTimeString(), msg: `${supervisors.length} supervisors active`, type: 'log-info' },
-    { time: new Date(Date.now()-900000).toLocaleTimeString(), msg: 'Shift assignments loaded', type: 'log-success' },
-    { time: new Date(Date.now()-1200000).toLocaleTimeString(), msg: 'CSV import ready', type: 'log-info' },
-    { time: new Date(Date.now()-1500000).toLocaleTimeString(), msg: 'System initialized', type: 'log-success' },
-  ];
-  document.getElementById('adm-log-body').innerHTML = logs.map(l=>`
-    <div class="admin-log-item">
-      <span class="admin-log-time">${l.time}</span>
-      <span class="admin-log-msg">${l.msg}</span>
-      <span class="admin-log-type ${l.type}">${l.type==='log-success'?'OK':l.type==='log-warn'?'WARN':'INFO'}</span>
-    </div>`).join('');
-  document.getElementById('adm-log-count').textContent = logs.length+' Events';
+  renderActivityLog();
+  buildUserMgmtTable();
 }
 
 function exportAllData() {
@@ -1599,6 +2018,273 @@ function exportAllData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'dashboard_data_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+}
+
+// ===================== CSV EXPORT =====================
+function exportTasksCsv() {
+  const tasks = window._supervisorFilter
+    ? allTasks.filter(t => t.supervisor === window._supervisorFilter)
+    : allTasks;
+  const header = 'date,shift,supervisor,task,priority,status';
+  const rows = tasks.map(t =>
+    [t.date, t.shift, t.supervisor, t.task, t.priority, t.status]
+      .map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(',')
+  );
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  const name = window._supervisorFilter
+    ? window._supervisorFilter.split(' ').pop()+'_tasks'
+    : 'all_tasks';
+  a.download = name+'_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+// ===================== PDF EXPORT (Overview) =====================
+function exportOverviewPdf() {
+  const today = new Date(); today.setHours(23,59,59,999);
+  const tasks = window._supervisorFilter
+    ? allTasks.filter(t => t.supervisor === window._supervisorFilter)
+    : allTasks;
+  const visibleTasks = tasks.filter(t => {
+    try { return parseDate(t.date) <= today; } catch(e){ return true; }
+  });
+  const total = visibleTasks.length;
+  const completed = visibleTasks.filter(t=>t.status==='Completed').length;
+  const pending = total - completed;
+  const pct = total>0?(completed/total*100):0;
+  const supTitle = window._supervisorFilter ? window._supervisorFilter : 'All Supervisors';
+
+  // Build supervisor breakdown
+  const supRows = window._supervisorFilter
+    ? supervisors.filter(s=>s.name===window._supervisorFilter)
+    : [...supervisors].sort((a,b)=>b.pct-a.pct);
+
+  const supHtml = supRows.map((s,i)=>`
+    <tr style="border-bottom:1px solid #e5e7eb;">
+      <td style="padding:8px 12px;">${i+1}</td>
+      <td style="padding:8px 12px;font-weight:600;">${s.name}</td>
+      <td style="padding:8px 12px;">${s.shift}</td>
+      <td style="padding:8px 12px;text-align:center;">${s.total}</td>
+      <td style="padding:8px 12px;text-align:center;color:#10b981;">${s.completed}</td>
+      <td style="padding:8px 12px;text-align:center;color:${s.pending>0?'#f59e0b':'#6b7280'};">${s.pending}</td>
+      <td style="padding:8px 12px;text-align:center;font-weight:700;color:${s.pct===100?'#10b981':s.pct>=80?'#3b82f6':s.pct>=60?'#f59e0b':'#ef4444'};">${s.pct===100?'100%':s.pct.toFixed(1)+'%'}</td>
+    </tr>`).join('');
+
+  const pending_list = visibleTasks.filter(t=>t.status==='Pending');
+  const pendHtml = pending_list.length===0
+    ? '<p style="color:#10b981;">✅ Koi pending tasks nahi!</p>'
+    : pending_list.map(t=>`<div style="margin-bottom:8px;padding:8px 12px;background:#fef9c3;border-left:3px solid #f59e0b;border-radius:4px;font-size:13px;">
+        <strong>${t.supervisor}</strong> — ${t.task}
+        <span style="color:#6b7280;margin-left:8px;">${t.date} | ${t.shift}</span>
+      </div>`).join('');
+
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Supervisors Dashboard — Overview Report</title>
+    <style>
+      body{font-family:'Segoe UI',sans-serif;margin:0;padding:24px;background:#fff;color:#1f2937;}
+      h1{font-size:22px;color:#1e40af;margin-bottom:4px;}
+      .sub{color:#6b7280;font-size:13px;margin-bottom:20px;}
+      .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+      .kpi{padding:16px;border-radius:10px;text-align:center;}
+      .kpi-val{font-size:32px;font-weight:700;}
+      .kpi-lbl{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;}
+      table{width:100%;border-collapse:collapse;font-size:13px;}
+      th{background:#f3f4f6;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;}
+      .section-title{font-size:15px;font-weight:700;color:#1f2937;margin:20px 0 12px;border-bottom:2px solid #e5e7eb;padding-bottom:6px;}
+      @media print{body{padding:16px;}}
+    </style></head><body>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <h1>🏆 Supervisors Performance Dashboard</h1>
+        <div class="sub">Report for: <strong>${supTitle}</strong> &nbsp;|&nbsp; Generated: ${new Date().toLocaleString()}</div>
+      </div>
+      <button onclick="window.print()" style="padding:8px 18px;background:#1e40af;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Print / Save PDF</button>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi" style="background:#eff6ff;"><div class="kpi-val" style="color:#1e40af;">${total}</div><div class="kpi-lbl">Total Tasks</div></div>
+      <div class="kpi" style="background:#f0fdf4;"><div class="kpi-val" style="color:#16a34a;">${completed}</div><div class="kpi-lbl">Completed</div></div>
+      <div class="kpi" style="background:#fffbeb;"><div class="kpi-val" style="color:#d97706;">${pending}</div><div class="kpi-lbl">Pending</div></div>
+      <div class="kpi" style="background:#f5f3ff;"><div class="kpi-val" style="color:#7c3aed;">${pct.toFixed(1)}%</div><div class="kpi-lbl">Completion Rate</div></div>
+    </div>
+    <div class="section-title">📊 Supervisor Performance Breakdown</div>
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Shift</th><th>Total</th><th>Completed</th><th>Pending</th><th>Rate</th></tr></thead>
+      <tbody>${supHtml}</tbody>
+    </table>
+    <div class="section-title">⚠️ Pending Tasks</div>
+    ${pendHtml}
+  </body></html>`);
+  w.document.close();
+}
+
+// ===================== USER MANAGEMENT =====================
+function buildUserMgmtTable() {
+  const tbody = document.getElementById('user-mgmt-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = USERS.map((u,i) => {
+    const deniedTabsHtml = u.deniedTabs && u.deniedTabs.length
+      ? u.deniedTabs.map(t=>`<span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">${t}</span>`).join(' ')
+      : '<span style="font-size:11px;color:var(--green);">Full Access</span>';
+    const deniedFeatHtml = u.deniedFeatures && u.deniedFeatures.length
+      ? u.deniedFeatures.map(f=>`<span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);">${f}</span>`).join(' ')
+      : '<span style="font-size:11px;color:var(--green);">All Allowed</span>';
+    return `<tr>
+      <td style="color:var(--text3);">${i+1}</td>
+      <td style="font-weight:600;color:var(--accent);font-size:12px;">${u.empId}</td>
+      <td style="color:var(--text);">${u.name}</td>
+      <td><span style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;font-family:monospace;color:var(--yellow);">${u.password}</span></td>
+      <td>${u.role==='admin'?'<span class="user-role-badge role-admin-badge">ADMIN</span>':'<span class="user-role-badge role-sup-badge">SUPERVISOR</span>'}</td>
+      <td style="max-width:180px;">${deniedTabsHtml}</td>
+      <td style="max-width:220px;">${deniedFeatHtml}</td>
+      <td><div class="action-btns">
+        <button class="btn-edit" onclick="openEditUserModal('${u.empId}')">✏️ Edit</button>
+        ${u.role!=='admin'?`<button class="btn-del" onclick="deleteUser('${u.empId}')">🗑️</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddUserModal() {
+  document.getElementById('modal-user-title').textContent = '👤 Add Supervisor Login';
+  document.getElementById('fu-empid').value = 'EMP0'+String(USERS.length).padStart(2,'0');
+  document.getElementById('fu-pass').value = 'sup123';
+  document.getElementById('fu-name').value = '';
+  document.getElementById('fu-role').value = 'supervisor';
+  document.getElementById('fu-edit-empid').value = '';
+  // Default: deny roaster, shifts, all features
+  ['overview','supervisors','tasks','roaster','shifts'].forEach(t => {
+    document.getElementById('deny-'+t).checked = (t==='roaster'||t==='shifts');
+  });
+  ['addTask','editTask','deleteTask','csvUpload','addSupervisor'].forEach(f => {
+    document.getElementById('deny-'+f).checked = true;
+  });
+  document.getElementById('fu-empid').removeAttribute('readonly');
+  openModal('modal-user-mgmt');
+}
+
+function openEditUserModal(empId) {
+  const u = USERS.find(x=>x.empId===empId);
+  if(!u) return;
+  document.getElementById('modal-user-title').textContent = '✏️ Edit Supervisor Login';
+  document.getElementById('fu-empid').value = u.empId;
+  document.getElementById('fu-empid').setAttribute('readonly','true');
+  document.getElementById('fu-pass').value = u.password;
+  document.getElementById('fu-name').value = u.name;
+  document.getElementById('fu-role').value = u.role;
+  document.getElementById('fu-edit-empid').value = u.empId;
+  const denied = u.deniedTabs || [];
+  const deniedF = u.deniedFeatures || [];
+  ['overview','supervisors','tasks','roaster','shifts'].forEach(t => {
+    document.getElementById('deny-'+t).checked = denied.includes(t);
+  });
+  ['addTask','editTask','deleteTask','csvUpload','addSupervisor'].forEach(f => {
+    document.getElementById('deny-'+f).checked = deniedF.includes(f);
+  });
+  openModal('modal-user-mgmt');
+}
+
+function saveUserMgmt() {
+  const empId = document.getElementById('fu-empid').value.trim().toUpperCase();
+  const pass = document.getElementById('fu-pass').value.trim();
+  const name = document.getElementById('fu-name').value.trim();
+  const role = document.getElementById('fu-role').value;
+  const editId = document.getElementById('fu-edit-empid').value.trim();
+  if(!empId||!pass||!name) { alert('Employee ID, Password aur Name zaroor darj karein.'); return; }
+  const deniedTabs = ['overview','supervisors','tasks','roaster','shifts'].filter(t=>document.getElementById('deny-'+t).checked);
+  const deniedFeatures = ['addTask','editTask','deleteTask','csvUpload','addSupervisor'].filter(f=>document.getElementById('deny-'+f).checked);
+  if(editId) {
+    const idx = USERS.findIndex(u=>u.empId===editId);
+    if(idx>=0) { USERS[idx] = {...USERS[idx], password:pass, name, role, deniedTabs, deniedFeatures}; }
+  } else {
+    if(USERS.find(u=>u.empId===empId)) { alert('Yeh Employee ID pehle se exist karta hai.'); return; }
+    USERS.push({empId, password:pass, name, role, deniedTabs, deniedFeatures});
+    // Also add as supervisor if not exists
+    if(!supervisors.find(s=>s.name===name)) {
+      supervisors.push({rank:supervisors.length+1,name,shift:'Morning',timing:'9AM–6PM',total:0,completed:0,pending:0,pct:100});
+    }
+  }
+  if(editId) {
+    logActivity('EDIT USER', empId + ' (' + name + ') ka login/rights update kiya', 'info');
+  } else {
+    logActivity('ADD USER', 'Naya login create kiya: ' + empId + ' (' + name + ')', 'success');
+  }
+  closeModal('modal-user-mgmt');
+  buildUserMgmtTable();
+  buildAdminPage();
+  refreshAll();
+}
+
+function deleteUser(empId) {
+  if(!confirm('Is user ko delete karein? ' + empId)) return;
+  const u = USERS.find(x=>x.empId===empId);
+  logActivity('DELETE USER', (u?u.name:empId) + ' ka login delete kiya', 'danger');
+  const idx = USERS.findIndex(u=>u.empId===empId);
+  if(idx>=0) USERS.splice(idx,1);
+  buildUserMgmtTable();
+}
+
+// ===================== ACTIVITY LOG RENDER =====================
+function renderActivityLog(filterUser='', filterType='') {
+  const logBody = document.getElementById('adm-log-body');
+  const logCount = document.getElementById('adm-log-count');
+  if(!logBody) return;
+
+  let logs = activityLog;
+  if(filterUser) logs = logs.filter(l => l.user.toLowerCase().includes(filterUser.toLowerCase()));
+  if(filterType) logs = logs.filter(l => l.type === filterType);
+
+  if(logs.length === 0) {
+    logBody.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">Koi activity record nahi mili.</div>';
+    logCount.textContent = '0 Events';
+    return;
+  }
+
+  const typeMap = {
+    success: { cls: 'log-success', label: 'OK' },
+    info:    { cls: 'log-info',    label: 'INFO' },
+    warn:    { cls: 'log-warn',    label: 'WARN' },
+    danger:  { cls: 'log-danger',  label: 'DELETE' },
+  };
+
+  logBody.innerHTML = logs.map(l => {
+    const t = typeMap[l.type] || typeMap.info;
+    const roleColor = l.role==='admin'?'#a78bfa':'var(--accent)';
+    return `<div class="admin-log-item" style="align-items:flex-start;">
+      <div style="min-width:90px;">
+        <div style="font-size:11px;color:var(--text3);">${l.timeStr}</div>
+        <div style="font-size:10px;color:var(--text3);">${l.dateStr}</div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:12px;color:${roleColor};font-weight:600;">${l.user} <span style="color:var(--text3);font-weight:400;">(${l.role})</span></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;"><span style="color:var(--yellow);font-weight:600;">${l.action}:</span> ${l.detail}</div>
+      </div>
+      <span class="admin-log-type ${t.cls}">${t.label}</span>
+    </div>`;
+  }).join('');
+
+  logCount.textContent = logs.length + ' Events';
+}
+
+function filterActivityLog() {
+  const u = document.getElementById('log-filter-user') ? document.getElementById('log-filter-user').value : '';
+  const t = document.getElementById('log-filter-type') ? document.getElementById('log-filter-type').value : '';
+  renderActivityLog(u, t);
+}
+
+function exportActivityLogCsv() {
+  const header = 'Date,Time,User,Role,Action,Detail,Type';
+  const rows = activityLog.map(l =>
+    [l.dateStr, l.timeStr, l.user, l.role, l.action, l.detail, l.type]
+      .map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(',')
+  );
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'activity_log_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click();
 }
 
@@ -1720,6 +2406,7 @@ function importCsvData() {
     : action==='replace-all'
     ? `✅ Sab kuch replace ho gaya. ${added} tasks load hui!`
     : `✅ ${added} tasks successfully import ho gayi!`;
+  logActivity('CSV IMPORT', added + ' tasks CSV se import ki gayi (mode: ' + action + ')', 'success');
   showCsvResult(msg, true);
 }
 
@@ -1763,6 +2450,7 @@ function onDwaMode() {
 
 function buildDateAnalysis() {
   const mode = document.getElementById('dwa-mode').value;
+  const todayLimit = new Date(); todayLimit.setHours(23,59,59,999);
   let filtered = allTasks;
 
   if(mode === 'single') {
@@ -1770,17 +2458,26 @@ function buildDateAnalysis() {
     if(sel) {
       const selD = new Date(sel);
       filtered = allTasks.filter(t=>{ try{ return parseDate(t.date).toDateString()===selD.toDateString(); }catch(e){return false;} });
+    } else {
+      // no date selected yet — show nothing
+      filtered = [];
     }
   } else if(mode === 'range') {
     const from = document.getElementById('dwa-from').value;
-    const to = document.getElementById('dwa-to').value;
+    const to   = document.getElementById('dwa-to').value;
     filtered = allTasks.filter(t=>{
       try {
         const td = parseDate(t.date);
         if(from && td < new Date(from)) return false;
-        if(to && td > new Date(to+'T23:59:59')) return false;
+        if(to   && td > new Date(to+'T23:59:59')) return false;
         return true;
       } catch(e){ return false; }
+    });
+    // range mode: user manually selected, no auto-hide
+  } else {
+    // 'all' mode — hide future dates automatically
+    filtered = allTasks.filter(t=>{
+      try { return parseDate(t.date) <= todayLimit; } catch(e){ return true; }
     });
   }
 
@@ -1842,4 +2539,3 @@ function buildDateAnalysis() {
 </script>
 </body>
 </html>
-
