@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -352,6 +353,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div><div class="uc-name" id="adm-uname">Admin</div><div class="uc-role">Administrator</div></div>
       </div>
       <button class="btn-logout" onclick="logout()">⏻ Logout</button>
+      <!-- Company Logo / Image — right corner -->
+      <div id="topbar-logo-wrap" style="display:flex;align-items:center;margin-left:6px;cursor:pointer;" title="Click to change logo" onclick="document.getElementById('logo-file-input').click()">
+        <div id="topbar-logo-placeholder" style="width:48px;height:48px;border-radius:10px;border:1.5px dashed rgba(0,212,255,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);text-align:center;line-height:1.2;padding:4px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='rgba(0,212,255,0.35)'">🖼️<br>Logo</div>
+        <img id="topbar-logo-img" src="" alt="Logo" style="display:none;width:48px;height:48px;border-radius:10px;object-fit:contain;border:1px solid rgba(0,212,255,0.2);">
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="loadLogoImage(this)">
+      </div>
     </div>
   </div>
 
@@ -368,6 +375,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
   <!-- OVERVIEW -->
   <div id="adm-overview" class="tab-pane active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div class="fbar" style="margin-bottom:0">
+        <div class="fg"><label>📅 From:</label><input type="date" id="ov-df" onchange="renderOverview()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 11px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"></div>
+        <div class="fg"><label>To:</label><input type="date" id="ov-dt" onchange="renderOverview()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 11px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"></div>
+        <div class="fg"><label>Shift:</label><select id="ov-sh" onchange="renderOverview()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 11px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All Shifts</option><option>Morning</option><option>Mid</option><option>Night</option></select></div>
+        <button class="btn-r" onclick="resetOvFilters()">✕ Reset</button>
+      </div>
+      <button class="btn-a" onclick="downloadPDFReport()" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,.35);color:#f87171;font-weight:700;display:flex;align-items:center;gap:6px;">📄 Download PDF Report</button>
+    </div>
     <div class="kpi-row">
       <div class="kc b"><div class="ki">📦</div><div class="kl">Total Tasks</div><div class="kv" id="ov-total">0</div><div class="ks">All supervisors</div></div>
       <div class="kc g"><div class="ki">✅</div><div class="kl">Completed</div><div class="kv" id="ov-done">0</div><div class="ks">Successfully finished</div></div>
@@ -441,6 +457,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="fg"><label>To:</label><input type="date" id="task-dt" onchange="renderTasks()"></div>
       <button class="btn-r" onclick="resetTaskFilters()">✕ Reset</button>
       <button class="btn-a" onclick="openAddTask()">+ Add Task</button>
+      <button class="btn-g" onclick="document.getElementById('csv-upload-input').click()">📂 Upload CSV</button>
+      <button class="btn-a" onclick="downloadCSVTemplate()" style="background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,.3);color:#a78bfa;">📋 CSV Template</button>
+      <input type="file" id="csv-upload-input" accept=".csv" style="display:none" onchange="importCSV(this)">
     </div>
     <div class="sc">
       <div class="sh"><span class="st">📋 All Tasks</span><span class="sb b" id="task-cnt">0</span></div>
@@ -463,22 +482,65 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div id="ro-content"></div>
   </div>
 
-  <!-- OBSERVATIONS -->
+  <!-- OBSERVATIONS — Admin/HSSE Tracker -->
   <div id="adm-observations" class="tab-pane">
-    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kc b"><div class="kl">Total Observations</div><div class="kv">5</div><div class="ks">All categories</div></div>
-      <div class="kc y"><div class="kl">Pending</div><div class="kv">2</div><div class="ks">Needs resolution</div></div>
-      <div class="kc g"><div class="kl">Resolved</div><div class="kv">3</div><div class="ks">Closed</div></div>
+    <!-- Page Switch Bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;">
+        <button id="obs-pg-admin" class="tb active" onclick="switchObsPage('admin',this)" style="border-radius:6px;">🔐 Administrator Issues</button>
+        <button id="obs-pg-hsse" class="tb" onclick="switchObsPage('hsse',this)" style="border-radius:6px;">🦺 HSSE Issues</button>
+      </div>
+      <button class="btn-a" onclick="openAddObs()">+ Add Issue</button>
     </div>
-    <div class="sc"><div class="sh"><span class="st">🗂️ Admin Tracker Issues</span><span class="sb r">5 Records</span></div>
-      <div class="scb"><table class="tbl"><thead><tr><th>ID</th><th>Date</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>02 Apr 2026</td><td>LSC</td><td>Cleaning</td><td>Admin</td><td><span class="ph">● High</span></td><td>Muhammad Mubeen</td><td><span class="pill ok"><span class="pill-dot"></span>Closed</span></td><td style="color:var(--red);font-size:10px;font-weight:600">🔴 High Aging</td></tr>
-        <tr><td>2</td><td>08 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="ph">● High</span></td><td>Muhammad Mubeen</td><td><span class="pill ok"><span class="pill-dot"></span>Closed</span></td><td style="color:var(--red);font-size:10px;font-weight:600">🔴 High Aging</td></tr>
-        <tr><td>3</td><td>06 Apr 2026</td><td>LSC</td><td>Security</td><td>HSSE</td><td><span class="ph">● High</span></td><td>Muhammad Mubeen</td><td><span class="pill ok"><span class="pill-dot"></span>Closed</span></td><td style="color:var(--red);font-size:10px;font-weight:600">🔴 High Aging</td></tr>
-        <tr><td>4</td><td>06 Apr 2026</td><td>LSC</td><td>Tape</td><td>5S</td><td><span class="ph">● High</span></td><td>Muhammad Mubeen</td><td><span class="pill bad"><span class="pill-dot"></span>Open</span></td><td style="color:var(--red);font-size:10px;font-weight:600">🔴 High Aging</td></tr>
-        <tr><td>5</td><td>05 Apr 2026</td><td>LSC</td><td>Security</td><td>Admin</td><td><span class="pl">● Low</span></td><td>Muhammad Mubeen</td><td><span class="pill bad"><span class="pill-dot"></span>Open</span></td><td style="color:var(--red);font-size:10px;font-weight:600">🔴 High Aging</td></tr>
-      </tbody></table></div>
+
+    <!-- Admin Issues Page -->
+    <div id="obs-page-admin">
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kc b"><div class="kl">Total Issues</div><div class="kv" id="adm-obs-total">0</div><div class="ks">Administrator tracker</div></div>
+        <div class="kc y"><div class="kl">Open</div><div class="kv" id="adm-obs-open">0</div><div class="ks">Needs resolution</div></div>
+        <div class="kc g"><div class="kl">Closed</div><div class="kv" id="adm-obs-closed">0</div><div class="ks">Resolved</div></div>
+      </div>
+      <div class="sc">
+        <div class="sh">
+          <span class="st">🗂️ Administrator Tracker Issues</span>
+          <span class="sb r" id="adm-obs-cnt">0 Records</span>
+        </div>
+        <div class="fbar" style="padding:10px 14px 0;margin-bottom:0;">
+          <div class="fg"><label>Area:</label><select id="adm-obs-area-f" onchange="renderObsTable('admin')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option></select></div>
+          <div class="fg"><label>Status:</label><select id="adm-obs-status-f" onchange="renderObsTable('admin')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option><option>Open</option><option>Closed</option><option>In Progress</option></select></div>
+          <div class="fg"><label>Priority:</label><select id="adm-obs-pri-f" onchange="renderObsTable('admin')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option><option>High</option><option>Low</option></select></div>
+          <button class="btn-r" onclick="resetObsFilters('admin')">✕ Reset</button>
+        </div>
+        <div class="scb" style="max-height:480px">
+          <table class="tbl"><thead><tr><th>#</th><th>Date</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th><th>Actions</th></tr></thead>
+          <tbody id="adm-obs-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HSSE Issues Page -->
+    <div id="obs-page-hsse" style="display:none">
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kc b"><div class="kl">Total Issues</div><div class="kv" id="hsse-obs-total">0</div><div class="ks">HSSE tracker</div></div>
+        <div class="kc y"><div class="kl">Open</div><div class="kv" id="hsse-obs-open">0</div><div class="ks">Needs resolution</div></div>
+        <div class="kc g"><div class="kl">Closed</div><div class="kv" id="hsse-obs-closed">0</div><div class="ks">Resolved</div></div>
+      </div>
+      <div class="sc">
+        <div class="sh">
+          <span class="st">🦺 HSSE Tracker Issues</span>
+          <span class="sb b" id="hsse-obs-cnt">0 Records</span>
+        </div>
+        <div class="fbar" style="padding:10px 14px 0;margin-bottom:0;">
+          <div class="fg"><label>Area:</label><select id="hsse-obs-area-f" onchange="renderObsTable('hsse')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option></select></div>
+          <div class="fg"><label>Status:</label><select id="hsse-obs-status-f" onchange="renderObsTable('hsse')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option><option>Open</option><option>Closed</option><option>In Progress</option></select></div>
+          <div class="fg"><label>Priority:</label><select id="hsse-obs-pri-f" onchange="renderObsTable('hsse')" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 10px;font-family:'Exo 2',sans-serif;font-size:12px;outline:none;"><option value="">All</option><option>High</option><option>Low</option></select></div>
+          <button class="btn-r" onclick="resetObsFilters('hsse')">✕ Reset</button>
+        </div>
+        <div class="scb" style="max-height:480px">
+          <table class="tbl"><thead><tr><th>#</th><th>Date</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th><th>Actions</th></tr></thead>
+          <tbody id="hsse-obs-body"></tbody></table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -496,6 +558,21 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
   <!-- ADMIN PANEL TAB -->
   <div id="adm-admin-panel" class="tab-pane">
+    <!-- Page switcher dropdown -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+      <div style="position:relative;" id="adm-panel-switcher">
+        <button onclick="toggleAdmPanelMenu()" style="background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,.3);color:#a78bfa;border-radius:9px;padding:7px 15px;font-family:'Exo 2',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;" id="adm-panel-switcher-btn">
+          <span id="adm-panel-page-label">⚙️ Administrator Panel</span> ▾
+        </button>
+        <div id="adm-panel-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;min-width:200px;z-index:100;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5);">
+          <div onclick="switchAdmPanel('admin')" style="padding:11px 16px;cursor:pointer;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''">⚙️ Administrator Panel</div>
+          <div onclick="switchAdmPanel('hsse')" style="padding:11px 16px;cursor:pointer;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;transition:background .15s;border-top:1px solid var(--border);" onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''">🦺 HSSE Panel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Administrator Page -->
+    <div id="adm-panel-page-admin">
     <div class="astat-row">
       <div class="ast"><div class="asv" style="color:var(--accent)" id="as-total">0</div><div class="asl">Total Users</div></div>
       <div class="ast"><div class="asv" style="color:var(--green)" id="as-active">0</div><div class="asl">Active</div></div>
@@ -526,6 +603,28 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         </div>
       </div>
       <div class="scb" style="max-height:480px" id="user-list"></div>
+    </div>
+    </div><!-- end admin panel page -->
+
+    <!-- HSSE Panel Page -->
+    <div id="adm-panel-page-hsse" style="display:none">
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kc b"><div class="kl">Total HSSE Issues</div><div class="kv" id="hsse-panel-total">0</div></div>
+        <div class="kc y"><div class="kl">Open</div><div class="kv" id="hsse-panel-open">0</div></div>
+        <div class="kc g"><div class="kl">Closed</div><div class="kv" id="hsse-panel-closed">0</div></div>
+        <div class="kc r"><div class="kl">High Priority</div><div class="kv" id="hsse-panel-high">0</div></div>
+      </div>
+      <div class="sc">
+        <div class="sh">
+          <span class="st">🦺 HSSE Issues Panel</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="sb b" id="hsse-panel-cnt">0 Issues</span>
+            <button class="btn-a" onclick="openAddObs('hsse')">+ Add HSSE Issue</button>
+          </div>
+        </div>
+        <div class="scb" style="max-height:500px"><table class="tbl"><thead><tr><th>#</th><th>Date</th><th>Area</th><th>Issue</th><th>Category</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Aging</th><th>Actions</th></tr></thead>
+        <tbody id="hsse-panel-body"></tbody></table></div>
+      </div>
     </div>
   </div>
 </div><!-- end wrapper -->
@@ -716,6 +815,23 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 </div>
 
+<!-- Observation/Issue Modal -->
+<div class="mo" id="m-obs">
+  <div class="mb">
+    <h2 id="m-obs-title">➕ Add Issue</h2>
+    <div class="fg2"><label>Date</label><input type="date" id="mob-date"></div>
+    <div class="fg2"><label>Area</label><input type="text" id="mob-area" placeholder="e.g. LSC, Gate 1..."></div>
+    <div class="fg2"><label>Issue Description</label><input type="text" id="mob-issue" placeholder="Describe the issue..."></div>
+    <div class="fg2"><label>Category</label><input type="text" id="mob-cat" placeholder="e.g. Admin, HSSE, 5S, Security..."></div>
+    <div class="fg2"><label>Priority</label><select id="mob-pri"><option>High</option><option>Low</option></select></div>
+    <div class="fg2"><label>Assigned To</label><select id="mob-assigned"></select></div>
+    <div class="fg2"><label>Status</label><select id="mob-stat"><option>Open</option><option>In Progress</option><option>Closed</option></select></div>
+    <input type="hidden" id="mob-type">
+    <input type="hidden" id="mob-idx">
+    <div class="ma"><button class="bc" onclick="closeModal('m-obs')">Cancel</button><button class="bs" onclick="saveObs()">💾 Save Issue</button></div>
+  </div>
+</div>
+
 <script>
 // =====================================================================
 // CONSTANTS
@@ -836,6 +952,16 @@ function initUsers() {
   });
 }
 
+let obsAdmin = [
+  {date:'02 Apr 2026',area:'LSC',issue:'Cleaning',cat:'Admin',pri:'High',assigned:'Muhammad Mubeen',stat:'Closed'},
+  {date:'08 Apr 2026',area:'LSC',issue:'Security',cat:'Admin',pri:'High',assigned:'Muhammad Mubeen',stat:'Closed'},
+  {date:'05 Apr 2026',area:'LSC',issue:'Security',cat:'Admin',pri:'Low',assigned:'Muhammad Mubeen',stat:'Open'},
+];
+let obsHSSE = [
+  {date:'06 Apr 2026',area:'LSC',issue:'Security',cat:'HSSE',pri:'High',assigned:'Muhammad Mubeen',stat:'Closed'},
+  {date:'06 Apr 2026',area:'LSC',issue:'Tape',cat:'5S',pri:'High',assigned:'Muhammad Mubeen',stat:'Open'},
+];
+
 let actLog = [];
 function log(msg) {
   actLog.unshift({msg, time: new Date().toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})});
@@ -905,6 +1031,9 @@ function loginAdmin(u) {
   document.getElementById('adm-uname').textContent = u.name;
   refreshAll();
   adminTab('overview', document.querySelector('#screen-admin .tb'));
+  // Initialize observations
+  renderObsKPIs();
+  renderObsTable('admin');
 }
 
 function loginSupervisor(u) {
@@ -951,6 +1080,7 @@ function adminTab(name, btn) {
   if (btn) btn.classList.add('active');
   if (name==='roaster') renderRoaster('admin');
   if (name==='admin-panel') renderAdminPanel();
+  if (name==='observations') { renderObsKPIs(); renderObsTable(currentObsPage); }
 }
 
 function supTab(name, btn) {
@@ -975,9 +1105,12 @@ function pctInfo(p) {
   return ['plo','clo'];
 }
 function parseDt(str) {
+  if(!str) return null;
   const m={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-  const p=str.split(' ');
-  return new Date(+p[2],m[p[1]],+p[0]);
+  const p=str.trim().split(/\s+/);
+  if(p.length===3 && m[p[1]]!==undefined) return new Date(+p[2],m[p[1]],+p[0]);
+  const d=new Date(str); if(!isNaN(d)) return d;
+  return null;
 }
 function toInputDt(str) { try{return parseDt(str).toISOString().split('T')[0];}catch(e){return '';} }
 function fromInputDt(str) {
@@ -1079,7 +1212,7 @@ function renderTasks() {
     if(sup&&t.sup!==sup)return false;
     if(st&&t.stat!==st)return false;
     if(sh&&t.shift!==sh)return false;
-    if(df||dt){try{const td=parseDt(t.date);if(df&&td<new Date(df))return false;if(dt&&td>new Date(dt+'T23:59:59'))return false;}catch(e){}}
+    if(df||dt){const td=parseDt(t.date);if(td){if(df&&td<new Date(df))return false;if(dt&&td>new Date(dt+'T23:59:59'))return false;}}
     return true;
   });
   document.getElementById('task-body').innerHTML=data.map((t,i)=>`<tr>
@@ -1112,7 +1245,7 @@ function renderSupTasks() {
   const mine=tasks.map((t,i)=>({...t,idx:i})).filter(t=>{
     if(t.sup!==CU.name)return false;
     if(st&&t.stat!==st)return false;
-    if(df||dt){try{const td=parseDt(t.date);if(df&&td<new Date(df))return false;if(dt&&td>new Date(dt+'T23:59:59'))return false;}catch(e){}}
+    if(df||dt){const td=parseDt(t.date);if(td){if(df&&td<new Date(df))return false;if(dt&&td>new Date(dt+'T23:59:59'))return false;}}
     return true;
   });
   const total=mine.length, done=mine.filter(t=>t.stat==='Completed').length, pend=total-done;
@@ -1492,16 +1625,7 @@ function openDel(type,idx,label){
   document.getElementById('del-detail').textContent=label;
   openModal('m-del');
 }
-function confirmDel(){
-  if(delType==='task'){tasks.splice(delIdx,1);log('Task deleted');refreshAll();}
-  else if(delType==='sup'){const n=supervisors[delIdx].name;supervisors.splice(delIdx,1);log('Supervisor deleted: '+n);refreshAll();buildSupLoginList();}
-  else if(delType==='shift'){shiftEntries.splice(delIdx,1);renderShifts();}
-  else if(delType==='user'){
-    if(users[delIdx]===CU){alert('Cannot delete your own account.');closeModal('m-del');return;}
-    const n=users[delIdx].name||users[delIdx].username;users.splice(delIdx,1);log('User deleted: '+n);renderAdminPanel();
-  }
-  closeModal('m-del');delType=null;delIdx=null;
-}
+// confirmDel is defined in the observations section below (handles obs_ types too)
 
 // =====================================================================
 // ROASTER INLINE
@@ -1525,6 +1649,8 @@ function refreshAll(){
   renderTasks();
   populateTaskSupFilter();
   renderShifts();
+  renderObsKPIs();
+  renderObsTable(currentObsPage);
 }
 
 // =====================================================================
@@ -1540,7 +1666,386 @@ document.querySelector('[onclick="openModal(\'m-adduser\')"]').onclick = functio
 };
 
 // =====================================================================
-// INIT
+// CSV IMPORT
+// =====================================================================
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) { alert('CSV file mein koi data nahi mila.'); return; }
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g,''));
+    // Map headers: date, shift, supervisor/sup, task, priority/pri, status/stat
+    const colMap = {};
+    headers.forEach((h,i) => {
+      if (h.includes('date')) colMap.date = i;
+      else if (h.includes('shift')) colMap.shift = i;
+      else if (h.includes('sup')) colMap.sup = i;
+      else if (h.includes('task')) colMap.task = i;
+      else if (h.includes('prior') || h === 'pri') colMap.pri = i;
+      else if (h.includes('stat') || h === 'status') colMap.stat = i;
+    });
+    const required = ['date','shift','sup','task'];
+    const missing = required.filter(k => colMap[k] === undefined);
+    if (missing.length) {
+      alert('CSV mein yeh columns nahi mile: ' + missing.join(', ') + '\n\nRequired columns: Date, Shift, Supervisor, Task\nOptional: Priority, Status');
+      input.value = '';
+      return;
+    }
+    let added = 0, skipped = 0;
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      // Handle quoted CSV fields
+      const cols = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+      const clean = cols.map(c => c ? c.trim().replace(/^"|"$/g,'') : '');
+      const date = clean[colMap.date] || '';
+      const shift = clean[colMap.shift] || '';
+      const sup = clean[colMap.sup] || '';
+      const task = clean[colMap.task] || '';
+      if (!date || !shift || !sup || !task) { skipped++; continue; }
+      // Normalize shift
+      const shiftNorm = shift.charAt(0).toUpperCase() + shift.slice(1).toLowerCase();
+      const validShifts = ['Morning','Mid','Night'];
+      const finalShift = validShifts.find(s => s.toLowerCase() === shiftNorm.toLowerCase()) || shift;
+      const pri = colMap.pri !== undefined ? (clean[colMap.pri] || 'High') : 'High';
+      const stat = colMap.stat !== undefined ? (clean[colMap.stat] || 'Pending') : 'Pending';
+      tasks.push({ date, shift: finalShift, sup, task, pri: pri.charAt(0).toUpperCase()+pri.slice(1).toLowerCase() === 'low' ? 'Low' : 'High', stat: stat.charAt(0).toUpperCase()+stat.slice(1) });
+      added++;
+    }
+    input.value = '';
+    log(`CSV Import: ${added} tasks added, ${skipped} rows skipped`);
+    refreshAll();
+    alert(`✅ CSV Import Complete!\n\n${added} tasks added\n${skipped} rows skipped (incomplete data)`);
+  };
+  reader.readAsText(file);
+}
+
+// =====================================================================
+// CSV TEMPLATE DOWNLOAD
+// =====================================================================
+function downloadCSVTemplate() {
+  const header = 'Date,Shift,Supervisor,Task,Priority,Status';
+  const example1 = '06 Apr 2026,Morning,Muhammad Mubeen,Task Description Here,High,Pending';
+  const example2 = '06 Apr 2026,Mid,Ahsan Jilani,Another Task Example,Low,Completed';
+  const example3 = '06 Apr 2026,Night,Ghazi Salah Ud Din Mirza,Night Task Example,High,Pending';
+  const notes = [
+    '',
+    '# ===== CSV TEMPLATE INSTRUCTIONS =====',
+    '# Date format: DD Mon YYYY  (e.g. 06 Apr 2026)',
+    '# Shift values: Morning | Mid | Night',
+    '# Priority values: High | Low',
+    '# Status values: Pending | Completed',
+    '# Supervisor: must match exact name from supervisor list',
+  ];
+  const csv = [header, example1, example2, example3, ...notes].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tasks_csv_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  log('CSV Template downloaded');
+}
+
+// =====================================================================
+// OBSERVATIONS / TRACKER FUNCTIONS
+// =====================================================================
+let currentObsPage = 'admin'; // 'admin' or 'hsse'
+
+function switchObsPage(type, btn) {
+  currentObsPage = type;
+  // Toggle page visibility
+  document.getElementById('obs-page-admin').style.display = type === 'admin' ? 'block' : 'none';
+  document.getElementById('obs-page-hsse').style.display  = type === 'hsse'  ? 'block' : 'none';
+  // Toggle active button
+  document.querySelectorAll('#adm-observations .tb').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderObsTable(type);
+}
+
+function openAddObs(type) {
+  const t = type || currentObsPage;
+  document.getElementById('m-obs-title').textContent = t === 'hsse' ? '🦺 Add HSSE Issue' : '🔐 Add Administrator Issue';
+  document.getElementById('mob-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mob-area').value = '';
+  document.getElementById('mob-issue').value = '';
+  document.getElementById('mob-cat').value = t === 'hsse' ? 'HSSE' : 'Admin';
+  document.getElementById('mob-pri').value = 'High';
+  document.getElementById('mob-stat').value = 'Open';
+  document.getElementById('mob-idx').value = '';
+  document.getElementById('mob-type').value = t;
+  // Fill assigned-to dropdown
+  const sel = document.getElementById('mob-assigned');
+  sel.innerHTML = supervisors.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  openModal('m-obs');
+}
+
+function openEditObs(type, idx) {
+  const arr = type === 'hsse' ? obsHSSE : obsAdmin;
+  const o = arr[idx];
+  document.getElementById('m-obs-title').textContent = type === 'hsse' ? '✏️ Edit HSSE Issue' : '✏️ Edit Administrator Issue';
+  // Date back to input format
+  document.getElementById('mob-date').value = toInputDt(o.date) || o.date;
+  document.getElementById('mob-area').value = o.area;
+  document.getElementById('mob-issue').value = o.issue;
+  document.getElementById('mob-cat').value = o.cat;
+  document.getElementById('mob-pri').value = o.pri;
+  document.getElementById('mob-stat').value = o.stat;
+  document.getElementById('mob-idx').value = idx;
+  document.getElementById('mob-type').value = type;
+  const sel = document.getElementById('mob-assigned');
+  sel.innerHTML = supervisors.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  sel.value = o.assigned;
+  openModal('m-obs');
+}
+
+function saveObs() {
+  const type    = document.getElementById('mob-type').value || currentObsPage;
+  const dateRaw = document.getElementById('mob-date').value;
+  const date    = fromInputDt(dateRaw) || dateRaw;
+  const area    = document.getElementById('mob-area').value.trim();
+  const issue   = document.getElementById('mob-issue').value.trim();
+  const cat     = document.getElementById('mob-cat').value.trim();
+  const pri     = document.getElementById('mob-pri').value;
+  const assigned= document.getElementById('mob-assigned').value;
+  const stat    = document.getElementById('mob-stat').value;
+  if (!area || !issue) { alert('Please fill Area and Issue fields.'); return; }
+  const arr  = type === 'hsse' ? obsHSSE : obsAdmin;
+  const idxEl= document.getElementById('mob-idx').value;
+  const entry= { date, area, issue, cat, pri, assigned, stat };
+  if (idxEl !== '') {
+    arr[+idxEl] = entry;
+    log((type === 'hsse' ? 'HSSE' : 'Admin') + ' issue updated: ' + issue);
+  } else {
+    arr.push(entry);
+    log((type === 'hsse' ? 'HSSE' : 'Admin') + ' issue added: ' + issue);
+  }
+  closeModal('m-obs');
+  renderObsTable(type);
+  renderObsKPIs();
+}
+
+function deleteObs(type, idx) {
+  const arr  = type === 'hsse' ? obsHSSE : obsAdmin;
+  const label= arr[idx] ? arr[idx].issue : 'this issue';
+  openDel('obs_'+type, idx, label);
+}
+
+// Extend confirmDel to handle obs types
+const _origConfirmDel = window.confirmDel;
+function confirmDel() {
+  if (delType && delType.startsWith('obs_')) {
+    const t = delType.split('_')[1]; // 'admin' or 'hsse'
+    const arr = t === 'hsse' ? obsHSSE : obsAdmin;
+    const label = arr[delIdx] ? arr[delIdx].issue : '';
+    arr.splice(delIdx, 1);
+    log((t === 'hsse' ? 'HSSE' : 'Admin') + ' issue deleted: ' + label);
+    closeModal('m-del');
+    delType = null; delIdx = null;
+    renderObsTable(t);
+    renderObsKPIs();
+    return;
+  }
+  // original logic
+  if(delType==='task'){tasks.splice(delIdx,1);log('Task deleted');refreshAll();}
+  else if(delType==='sup'){const n=supervisors[delIdx].name;supervisors.splice(delIdx,1);log('Supervisor deleted: '+n);refreshAll();buildSupLoginList();}
+  else if(delType==='shift'){shiftEntries.splice(delIdx,1);renderShifts();}
+  else if(delType==='user'){
+    if(users[delIdx]===CU){alert('Cannot delete your own account.');closeModal('m-del');return;}
+    const n=users[delIdx].name||users[delIdx].username;users.splice(delIdx,1);log('User deleted: '+n);renderAdminPanel();
+  }
+  closeModal('m-del');delType=null;delIdx=null;
+}
+
+function renderObsKPIs() {
+  // Admin KPIs
+  document.getElementById('adm-obs-total').textContent  = obsAdmin.length;
+  document.getElementById('adm-obs-open').textContent   = obsAdmin.filter(o=>o.stat==='Open').length;
+  document.getElementById('adm-obs-closed').textContent = obsAdmin.filter(o=>o.stat==='Closed').length;
+  document.getElementById('adm-obs-cnt').textContent    = obsAdmin.length + ' Records';
+  // HSSE KPIs
+  document.getElementById('hsse-obs-total').textContent  = obsHSSE.length;
+  document.getElementById('hsse-obs-open').textContent   = obsHSSE.filter(o=>o.stat==='Open').length;
+  document.getElementById('hsse-obs-closed').textContent = obsHSSE.filter(o=>o.stat==='Closed').length;
+  document.getElementById('hsse-obs-cnt').textContent    = obsHSSE.length + ' Records';
+  // Populate area filter dropdowns
+  ['adm','hsse'].forEach(prefix => {
+    const arr = prefix === 'adm' ? obsAdmin : obsHSSE;
+    const sel = document.getElementById(prefix+'-obs-area-f');
+    const cur = sel.value;
+    const areas = [...new Set(arr.map(o=>o.area))].sort();
+    sel.innerHTML = '<option value="">All</option>' + areas.map(a=>`<option value="${a}"${a===cur?' selected':''}>${a}</option>`).join('');
+  });
+}
+
+function renderObsTable(type) {
+  const arr  = type === 'hsse' ? obsHSSE : obsAdmin;
+  const prefix = type === 'hsse' ? 'hsse' : 'adm';
+  const areaF  = (document.getElementById(prefix+'-obs-area-f')?.value   || '');
+  const statF  = (document.getElementById(prefix+'-obs-status-f')?.value || '');
+  const priF   = (document.getElementById(prefix+'-obs-pri-f')?.value    || '');
+
+  let data = arr.map((o,i) => ({...o, idx:i})).filter(o => {
+    if (areaF && o.area !== areaF)  return false;
+    if (statF && o.stat !== statF)  return false;
+    if (priF  && o.pri  !== priF)   return false;
+    return true;
+  });
+
+  const now = new Date();
+  function aging(dateStr) {
+    try {
+      const d = parseDt(dateStr);
+      if (!d) return '—';
+      const days = Math.floor((now - d) / 86400000);
+      return days === 0 ? 'Today' : days + 'd';
+    } catch(e) { return '—'; }
+  }
+
+  const statBadge = s => {
+    const cls = s==='Closed' ? 'ok' : s==='In Progress' ? 'warn' : 'bad';
+    return `<span class="pill ${cls}"><span class="pill-dot"></span>${s}</span>`;
+  };
+
+  const bodyId = prefix + '-obs-body';
+  document.getElementById(bodyId).innerHTML = data.length ? data.map((o,i) => `<tr>
+    <td style="color:var(--text3)">${i+1}</td>
+    <td style="font-size:11px;color:var(--text3)">${o.date}</td>
+    <td class="tn">${o.area}</td>
+    <td>${o.issue}</td>
+    <td style="font-size:11px">${o.cat}</td>
+    <td><span class="${o.pri==='High'?'ph':'pl'}">● ${o.pri}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${o.assigned}</td>
+    <td>${statBadge(o.stat)}</td>
+    <td style="font-size:11px;color:${aging(o.date)==='Today'?'var(--green)':parseInt(aging(o.date))>7?'var(--red)':'var(--yellow)'}">${aging(o.date)}</td>
+    <td><div class="ab">
+      <button class="be" onclick="openEditObs('${type}',${o.idx})">✏️</button>
+      <button class="bd" onclick="deleteObs('${type}',${o.idx})">🗑️</button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No records found.</td></tr>`;
+
+  renderObsKPIs();
+}
+
+function resetObsFilters(type) {
+  const prefix = type === 'hsse' ? 'hsse' : 'adm';
+  ['area-f','status-f','pri-f'].forEach(s => {
+    const el = document.getElementById(prefix+'-obs-'+s);
+    if (el) el.value = '';
+  });
+  renderObsTable(type);
+}
+
+// =====================================================================
+// LOGO IMAGE LOADER
+// =====================================================================
+function loadLogoImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('topbar-logo-img');
+    const ph  = document.getElementById('topbar-logo-placeholder');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    ph.style.display  = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// =====================================================================
+// PDF REPORT DOWNLOAD
+// =====================================================================
+function downloadPDFReport() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.stat === 'Completed').length;
+  const pend = total - done;
+  const pct = total > 0 ? (done/total*100).toFixed(1) : '0.0';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-PK', {day:'2-digit',month:'short',year:'numeric'});
+  const timeStr = now.toLocaleTimeString('en-PK', {hour:'2-digit',minute:'2-digit'});
+
+  // Shift breakdown
+  const shiftData = ['Morning','Mid','Night'].map(sh => {
+    const st = tasks.filter(t => t.shift === sh);
+    const d = st.filter(t => t.stat === 'Completed').length;
+    return { shift: sh, total: st.length, done: d, pend: st.length - d, pct: st.length > 0 ? (d/st.length*100).toFixed(1) : '0.0' };
+  });
+
+  // Supervisor breakdown
+  const supData = supervisors.map(s => {
+    const ss = getSupStats(s.name);
+    return { ...s, ...ss };
+  }).sort((a,b) => b.pct - a.pct);
+
+  const pendingTasks = tasks.filter(t => t.stat === 'Pending');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Performance Report — ${dateStr}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a2e;background:#fff;padding:20px;}
+    .header{background:linear-gradient(135deg,#0a0e1a,#1a2340);color:white;padding:24px 28px;border-radius:10px;margin-bottom:20px;}
+    .header h1{font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:4px;}
+    .header p{font-size:12px;color:#94a3b8;}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+    .kc{padding:14px;border-radius:8px;border:1px solid #e2e8f0;text-align:center;}
+    .kv{font-size:28px;font-weight:700;margin-bottom:4px;}
+    .kl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b;}
+    .blue{color:#0ea5e9;}.green{color:#10b981;}.yellow{color:#f59e0b;}.purple{color:#7c3aed;}
+    h2{font-size:14px;font-weight:700;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;color:#0f172a;}
+    table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+    th{background:#f1f5f9;text-align:left;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#475569;border-bottom:2px solid #e2e8f0;}
+    td{padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:11px;}
+    tr:last-child td{border-bottom:none;}
+    .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+    .b-green{background:#dcfce7;color:#166534;}.b-yellow{background:#fef9c3;color:#854d0e;}.b-blue{background:#dbeafe;color:#1e40af;}.b-red{background:#fee2e2;color:#991b1b;}
+    .footer{margin-top:20px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;}
+    @media print{body{padding:10px;}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  </style></head><body>
+  <div class="header">
+    <h1>📊 SUPERVISORS PERFORMANCE REPORT</h1>
+    <p>Generated: ${dateStr} at ${timeStr} &nbsp;|&nbsp; Admin Dashboard</p>
+  </div>
+  <div class="kpi-row">
+    <div class="kc"><div class="kv blue">${total}</div><div class="kl">Total Tasks</div></div>
+    <div class="kc"><div class="kv green">${done}</div><div class="kl">Completed</div></div>
+    <div class="kc"><div class="kv yellow">${pend}</div><div class="kl">Pending</div></div>
+    <div class="kc"><div class="kv purple">${pct}%</div><div class="kl">Completion Rate</div></div>
+  </div>
+  <h2>📋 Shift Breakdown</h2>
+  <table><thead><tr><th>Shift</th><th>Total</th><th>Completed</th><th>Pending</th><th>Rate</th></tr></thead><tbody>
+  ${shiftData.map(s=>`<tr><td>${s.shift === 'Morning' ? '🌅' : s.shift === 'Mid' ? '🌤️' : '🌙'} ${s.shift}</td><td>${s.total}</td><td><span class="badge b-green">${s.done}</span></td><td><span class="badge b-yellow">${s.pend}</span></td><td>${s.pct}%</td></tr>`).join('')}
+  </tbody></table>
+  <h2>👥 Supervisor Performance</h2>
+  <table><thead><tr><th>#</th><th>Supervisor</th><th>Shift</th><th>Total</th><th>Done</th><th>Pending</th><th>Rate</th><th>Status</th></tr></thead><tbody>
+  ${supData.map((s,i)=>`<tr><td style="color:#94a3b8">${i+1}</td><td style="font-weight:600">${s.name}</td><td>${s.shift}</td><td>${s.total}</td><td>${s.done}</td><td>${s.pend}</td><td>${s.pct.toFixed(1)}%</td><td><span class="badge ${s.pct>=100?'b-green':s.pct>=75?'b-blue':s.pct>=50?'b-yellow':'b-red'}">${s.pct>=100?'✅ Perfect':s.pct>=75?'👍 Good':s.pct>=50?'⚠️ Fair':'🔴 Low'}</span></td></tr>`).join('')}
+  </tbody></table>
+  ${pendingTasks.length ? `<h2>⚠️ Pending Tasks (${pendingTasks.length})</h2>
+  <table><thead><tr><th>Date</th><th>Shift</th><th>Supervisor</th><th>Task</th><th>Priority</th></tr></thead><tbody>
+  ${pendingTasks.map(t=>`<tr><td style="color:#64748b">${t.date}</td><td>${t.shift}</td><td style="font-weight:600">${t.sup}</td><td>${t.task}</td><td><span class="badge ${t.pri==='High'?'b-red':'b-green'}">${t.pri}</span></td></tr>`).join('')}
+  </tbody></table>` : '<p style="color:#10b981;font-weight:600;padding:12px;background:#f0fdf4;border-radius:8px;margin:10px 0">✅ No pending tasks — All tasks completed!</p>'}
+  <div class="footer">Supervisors Performance Dashboard &nbsp;|&nbsp; Report generated on ${dateStr}</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) {
+    const a = document.createElement('a');
+    a.href = url; a.download = 'performance-report-'+now.toISOString().split('T')[0]+'.html';
+    a.click();
+  }
+  log('PDF Report downloaded');
+}
+
+// =====================================================================
 // =====================================================================
 (function init(){
   initUsers();
