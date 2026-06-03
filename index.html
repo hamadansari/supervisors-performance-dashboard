@@ -1128,8 +1128,29 @@ function getSupStats(name) {
 // =====================================================================
 // OVERVIEW
 // =====================================================================
+function getFilteredTasks() {
+  const df = document.getElementById('ov-df').value;
+  const dt = document.getElementById('ov-dt').value;
+  const sh = document.getElementById('ov-sh').value;
+  return tasks.filter(t => {
+    if (sh && t.shift !== sh) return false;
+    if (df || dt) {
+      const td = parseDt(t.date);
+      if (!td) return false;
+      if (df) { const from = new Date(df); from.setHours(0,0,0,0); if (td < from) return false; }
+      if (dt) { const to = new Date(dt); to.setHours(23,59,59,999); if (td > to) return false; }
+    }
+    return true;
+  });
+}
+function getSupStatsFiltered(name, filteredTasks) {
+  const st = filteredTasks.filter(t => t.sup === name);
+  const done = st.filter(t => t.stat === 'Completed').length;
+  return {total: st.length, done, pend: st.length - done, pct: st.length > 0 ? (done / st.length * 100) : 100};
+}
 function renderOverview() {
-  const total=tasks.length, done=tasks.filter(t=>t.stat==='Completed').length;
+  const ft = getFilteredTasks();
+  const total=ft.length, done=ft.filter(t=>t.stat==='Completed').length;
   const pend=total-done, pct=total>0?(done/total*100):0;
   document.getElementById('ov-total').textContent=total;
   document.getElementById('ov-done').textContent=done;
@@ -1146,22 +1167,27 @@ function renderOverview() {
   sDone.setAttribute('stroke-dashoffset','70.7');
   sPend.setAttribute('stroke-dasharray',`${pF} ${circ-pF}`);
   sPend.setAttribute('stroke-dashoffset',(70.7-cF)+'');
-  // Pending alerts
-  const pa=tasks.filter(t=>t.stat==='Pending');
+  // Pending alerts — filtered
+  const pa=ft.filter(t=>t.stat==='Pending');
   document.getElementById('pend-alerts').innerHTML=pa.length?pa.map(t=>`<div class="pa"><div class="pai">⚠️</div><div><div class="pan">${t.sup}</div><div class="pat">${t.task} — ${t.date}</div></div></div>`).join(''):'<div style="color:var(--green);font-size:12px">✅ No pending tasks!</div>';
-  // Shift lists
-  ['Morning','Mid','Night'].forEach(sh=>{
-    const id=sh==='Morning'?'mo':sh==='Mid'?'mi':'ni';
-    const sups=supervisors.filter(s=>s.shift===sh);
+  // Shift lists — filtered
+  const sh = document.getElementById('ov-sh').value;
+  ['Morning','Mid','Night'].forEach(s=>{
+    const id=s==='Morning'?'mo':s==='Mid'?'mi':'ni';
+    const sups=supervisors.filter(sv=>sv.shift===s);
     document.getElementById(id+'-cnt').textContent=sups.length;
-    document.getElementById(id+'-list').innerHTML=sups.map(s=>{const ss=getSupStats(s.name);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;"><span>${s.name.split(' ').slice(0,2).join(' ')}</span><span style="color:${ss.pend===0?'var(--green)':'var(--yellow)'};font-weight:600">${ss.done}/${ss.total} ${ss.pend===0?'✅':'⚠️'}</span></div>`;}).join('');
+    document.getElementById(id+'-list').innerHTML=sups.map(sv=>{
+      const ss=getSupStatsFiltered(sv.name, ft);
+      return`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg3);border-radius:8px;font-size:12px;"><span>${sv.name.split(' ').slice(0,2).join(' ')}</span><span style="color:${ss.pend===0?'var(--green)':'var(--yellow)'};font-weight:600">${ss.done}/${ss.total} ${ss.pend===0?'✅':'⚠️'}</span></div>`;
+    }).join('');
   });
   document.getElementById('ov-sc').textContent=supervisors.length;
-  // Chart
-  const sorted=[...supervisors].map(s=>({...s,...getSupStats(s.name)})).sort((a,b)=>b.done-a.done);
+  // Chart — filtered per supervisor
+  const sorted=[...supervisors].map(s=>({...s,...getSupStatsFiltered(s.name, ft)})).sort((a,b)=>b.done-a.done);
   const mx=Math.max(...sorted.map(s=>s.done),1);
   document.getElementById('perf-chart').innerHTML=sorted.map(s=>{const[pc]=pctInfo(s.pct);return`<div class="cr"><div class="cl" title="${s.name}">${s.name.split(' ').slice(-1)[0]}, ${s.name.split(' ')[0]}</div><div class="ct"><div class="cf ${pc==='p100'?'cfg':'cfb'}" style="width:${(s.done/mx)*100}%">${s.done}</div></div></div>`;}).join('');
 }
+function resetOvFilters(){['ov-df','ov-dt','ov-sh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderOverview();}
 
 // =====================================================================
 // SUPERVISOR TABLE
@@ -1963,28 +1989,42 @@ function loadLogoImage(input) {
 // PDF REPORT DOWNLOAD
 // =====================================================================
 function downloadPDFReport() {
-  const total = tasks.length;
-  const done = tasks.filter(t => t.stat === 'Completed').length;
+  // Use same filtered tasks as Overview dashboard
+  const ft = getFilteredTasks();
+  const df = document.getElementById('ov-df').value;
+  const dt = document.getElementById('ov-dt').value;
+  const sh = document.getElementById('ov-sh').value;
+
+  const total = ft.length;
+  const done = ft.filter(t => t.stat === 'Completed').length;
   const pend = total - done;
   const pct = total > 0 ? (done/total*100).toFixed(1) : '0.0';
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-PK', {day:'2-digit',month:'short',year:'numeric'});
   const timeStr = now.toLocaleTimeString('en-PK', {hour:'2-digit',minute:'2-digit'});
 
-  // Shift breakdown
-  const shiftData = ['Morning','Mid','Night'].map(sh => {
-    const st = tasks.filter(t => t.shift === sh);
+  // Filter label for report header
+  const ms = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtD(s) { if(!s) return ''; const d=new Date(s); return `${String(d.getDate()).padStart(2,'0')} ${ms[d.getMonth()]} ${d.getFullYear()}`; }
+  const filterLabel = [
+    df||dt ? `📅 ${df ? fmtD(df) : '...'} → ${dt ? fmtD(dt) : '...'}` : '📅 All Dates',
+    sh ? `🕐 ${sh} Shift` : '🕐 All Shifts'
+  ].join('  &nbsp;|&nbsp;  ');
+
+  // Shift breakdown — filtered
+  const shiftData = ['Morning','Mid','Night'].map(s => {
+    const st = ft.filter(t => t.shift === s);
     const d = st.filter(t => t.stat === 'Completed').length;
-    return { shift: sh, total: st.length, done: d, pend: st.length - d, pct: st.length > 0 ? (d/st.length*100).toFixed(1) : '0.0' };
+    return { shift: s, total: st.length, done: d, pend: st.length - d, pct: st.length > 0 ? (d/st.length*100).toFixed(1) : '0.0' };
   });
 
-  // Supervisor breakdown
+  // Supervisor breakdown — filtered
   const supData = supervisors.map(s => {
-    const ss = getSupStats(s.name);
+    const ss = getSupStatsFiltered(s.name, ft);
     return { ...s, ...ss };
   }).sort((a,b) => b.pct - a.pct);
 
-  const pendingTasks = tasks.filter(t => t.stat === 'Pending');
+  const pendingTasks = ft.filter(t => t.stat === 'Pending');
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <title>Performance Report — ${dateStr}</title>
@@ -2012,6 +2052,7 @@ function downloadPDFReport() {
   <div class="header">
     <h1>📊 SUPERVISORS PERFORMANCE REPORT</h1>
     <p>Generated: ${dateStr} at ${timeStr} &nbsp;|&nbsp; Admin Dashboard</p>
+    <p style="margin-top:6px;font-size:11px;color:#7c8db5;">${filterLabel}</p>
   </div>
   <div class="kpi-row">
     <div class="kc"><div class="kv blue">${total}</div><div class="kl">Total Tasks</div></div>
